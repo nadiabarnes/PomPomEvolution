@@ -23,12 +23,23 @@ class PomPomWorld:
 
     def update(self):
         """
-        move the pompoms one turn
+        Update each PomPom in the world.
         """
+        new_grid = [[None for _ in range(self.height)] for _ in range(self.width)]
+
         for x in range(self.width):
             for y in range(self.height):
-                if self.grid[x][y] and not self.grid[x][y].update():
-                    self.grid[x][y] = None  # Remove dead PomPom
+                if self.grid[x][y]:
+                    pompom = self.grid[x][y]
+                    pompom.move(self.width, self.height)  # Move the PomPom
+                    if not pompom.update():  # Returns False if it dies, energy loss
+                        continue
+                    # Place PomPom in new grid if space is empty
+                    if new_grid[pompom.x][pompom.y] is None:
+                        new_grid[pompom.x][pompom.y] = pompom
+        self.grid = new_grid  # Replace old grid with updated positions
+
+                    
 
     def draw(self, screen):
         """

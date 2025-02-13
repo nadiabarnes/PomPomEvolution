@@ -21,7 +21,7 @@ class PomPom(object):
             return False  # Dies if energy reaches 0
         return True
     
-    def move(self):
+    def move(self, width, height):
         """
         Moves the PomPom to a random adjacent tile or stays in place.
         Ensures it does not move out of bounds.
