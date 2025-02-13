@@ -1,5 +1,5 @@
-import Evo
-import Pom
+from Evo import Evolution
+from Pom import PomPom
 from World import PomPomWorld
 import pygame
 
