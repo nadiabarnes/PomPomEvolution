@@ -1,5 +1,6 @@
 from Evo import Evolution
 from Pom import PomPom
+from Food import Bush
 import random
 import pygame
 
@@ -16,28 +17,45 @@ class PomPomWorld:
         self.height = height #grid height
         self.cell_size = cell_size #pop up window size
         self.grid = [[None for _ in range(height)] for _ in range(width)] #creates an empty grid
+        self.bushes = []
 
         for _ in range(10):  #num of starting pompoms
             x, y = random.randint(0, width - 1), random.randint(0, height - 1)
             self.grid[x][y] = PomPom(x, y)
+        
+        for _ in range(10):  # Starting num bushes
+            x, y = random.randint(0, width - 1), random.randint(0, height - 1)
+            self.bushes.append(Bush(x, y))
 
     def update(self):
         """
         Update each PomPom in the world.
+        Handles movement, energy reduction, and eating from bushes.
         """
-        new_grid = [[None for _ in range(self.height)] for _ in range(self.width)]
+        # Update food (bush) cooldowns
+        for bush in self.bushes:
+            bush.update()
 
+        # Create a new grid for updated PomPom positions
+        new_grid = [[None for _ in range(self.height)] for _ in range(self.width)]
         for x in range(self.width):
             for y in range(self.height):
-                if self.grid[x][y]:
+                if self.grid[x][y]:  # If there's a PomPom in this position
                     pompom = self.grid[x][y]
                     pompom.move(self.width, self.height)  # Move the PomPom
-                    if not pompom.update():  # Returns False if it dies, energy loss
+                    # Check if the PomPom lands on a Bush
+                    for bush in self.bushes:
+                        if pompom.x == bush.x and pompom.y == bush.y and bush.cooldown == 0:
+                            pompom.eat()  # Gain energy from eating
+                            bush.eaten()  # Put bush on cooldown
+                    # PomPom loses energy per turn
+                    if not pompom.update():  # If it dies, don't add to the new grid
                         continue
-                    # Place PomPom in new grid if space is empty
-                    if new_grid[pompom.x][pompom.y] is None:
-                        new_grid[pompom.x][pompom.y] = pompom
-        self.grid = new_grid  # Replace old grid with updated positions
+                    # Place PomPom in new grid
+                    new_grid[pompom.x][pompom.y] = pompom
+        # Update the grid with the new positions
+        self.grid = new_grid
+
 
                     
 
@@ -45,16 +63,23 @@ class PomPomWorld:
         """
         Draw the grid and PomPoms
         """
-        screen.fill((0, 0, 0))  # Clear screen with black
+        screen.fill((21, 60, 74))  # Clear screen with black
         font = pygame.font.Font(None, self.cell_size - 2)  #Create a font, size slightly smaller than cell
         text_color = (0, 0, 0)
+        for bush in self.bushes:
+            if bush.cooldown == 0:  # Only draw if active
+                pygame.draw.rect(
+                    screen,
+                    (65, 255, 110),  # Brown for Bushes
+                    (bush.x * self.cell_size, bush.y * self.cell_size, self.cell_size, self.cell_size)
+                )
         for x in range(self.width):
             for y in range(self.height):
                 if self.grid[x][y]: #if there is a pompom in this spot
                     pompom = self.grid[x][y]
                     pygame.draw.rect(
                         screen,
-                        (0, 255, 0),  # Green for living PomPoms
+                        (212, 30, 60),  # Green for living PomPoms
                         (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
                     )
                     energy_text = font.render(str(pompom.energy), True, text_color)

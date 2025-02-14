@@ -33,10 +33,17 @@ class PomPom(object):
             (-1, -1), (1, 1),  # Diagonal Top Left, Bottom Right
             (-1, 1), (1, -1)   # Diagonal Bottom Left, Top Right
         ]
-        
+
         dx, dy = random.choice(directions)  # Pick a random direction
         new_x, new_y = self.x + dx, self.y + dy
 
         # Ensure movement stays within bounds
         if 0 <= new_x < width and 0 <= new_y < height:
             self.x, self.y = new_x, new_y
+        else: self.move(width, height) #don't run into walls
+    
+    def eat(self):
+        """
+        when the pom encounters food, increase it's energy
+        """
+        self.energy = self.energy + 10 #change value?
