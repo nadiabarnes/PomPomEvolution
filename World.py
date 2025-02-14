@@ -29,14 +29,16 @@ class PomPomWorld:
 
     def update(self):
         """
-        Update each PomPom in the world.
-        Handles movement, energy reduction, and eating from bushes.
+        The most important method.
         """
-        # Update food (bush) cooldowns
+        self.updateFood()
+        self.updatePomPoms()
+    
+    def updateFood(self):
         for bush in self.bushes:
             bush.update()
-
-        # Create a new grid for updated PomPom positions
+    
+    def updatePomPoms(self):
         new_grid = [[None for _ in range(self.height)] for _ in range(self.width)]
         for x in range(self.width):
             for y in range(self.height):
@@ -54,12 +56,40 @@ class PomPomWorld:
                     # Place PomPom in new grid
                     new_grid[pompom.x][pompom.y] = pompom
         # Update the grid with the new positions
-        self.grid = new_grid
-
-
-                    
+        self.grid = new_grid 
 
     def draw(self, screen):
+        """
+        Draw the grid and PomPoms
+        """
+        screen.fill((21, 60, 74))  # Clear screen with black
+        font = pygame.font.Font(None, self.cell_size - 2)  #Create a font, size slightly smaller than cell
+        text_color = (0, 0, 0)
+        for bush in self.bushes:
+            if bush.cooldown == 0:  # Only draw if active
+                pygame.draw.rect(
+                    screen,
+                    (65, 255, 110),  # Brown for Bushes
+                    (bush.x * self.cell_size, bush.y * self.cell_size, self.cell_size, self.cell_size)
+                )
+        for x in range(self.width):
+            for y in range(self.height):
+                if self.grid[x][y]: #if there is a pompom in this spot
+                    pompom = self.grid[x][y]
+                    pygame.draw.rect(
+                        screen,
+                        (212, 30, 60),  # Green for living PomPoms
+                        (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
+                    )
+                    energy_text = font.render(str(pompom.energy), True, text_color)
+                    text_rect = energy_text.get_rect(center=(
+                        x * self.cell_size + self.cell_size // 2,
+                        y * self.cell_size + self.cell_size // 2
+                    ))
+                    screen.blit(energy_text, text_rect)
+        pygame.display.flip() #update the screen
+
+    def drawVISIONTESTER(self, screen):
         """
         Draw the grid and PomPoms
         """
