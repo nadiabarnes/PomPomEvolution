@@ -45,6 +45,7 @@ class PomPomWorld:
                 if self.grid[x][y]:  # If there's a PomPom in this position
                     pompom = self.grid[x][y]
                     pompom.move(self.width, self.height)  # Move the PomPom
+                    pompom.vision(3) #odd number
                     # Check if the PomPom lands on a Bush
                     for bush in self.bushes:
                         if pompom.x == bush.x and pompom.y == bush.y and bush.cooldown == 0:
@@ -57,6 +58,48 @@ class PomPomWorld:
                     new_grid[pompom.x][pompom.y] = pompom
         # Update the grid with the new positions
         self.grid = new_grid 
+    
+    def drawBushes(self, screen):
+        for bush in self.bushes:
+            if bush.cooldown == 0:  # Only draw if active
+                pygame.draw.rect(
+                    screen,
+                    (65, 255, 110),  # Brown for Bushes
+                    (bush.x * self.cell_size, bush.y * self.cell_size, self.cell_size, self.cell_size)
+                )
+    
+    def drawPomPoms(self, screen, font, text_color):
+        for x in range(self.width):
+            for y in range(self.height):
+                if self.grid[x][y]: #if there is a pompom in this spot
+                    pompom = self.grid[x][y]
+                    pygame.draw.rect(
+                        screen,
+                        (212, 30, 60),  # Green for living PomPoms
+                        (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
+                    )
+                    energy_text = font.render(str(pompom.energy), True, text_color)
+                    text_rect = energy_text.get_rect(center=(
+                        x * self.cell_size + self.cell_size // 2,
+                        y * self.cell_size + self.cell_size // 2
+                    ))
+                    screen.blit(energy_text, text_rect)
+    
+
+    
+    def drawVisableTiles(self, screen):
+        for x in range(self.width):
+            for y in range(self.height):
+                if self.grid[x][y]:  # If there is a PomPom in this spot
+                    visableTiles = self.grid[x][y].visableTiles  # That PomPom's current visible tiles
+                    for dx, dy in visableTiles:  # Iterate correctly
+                        pygame.draw.rect(
+                            screen,
+                            (255, 255, 255),  # White for visible tiles
+                            (dx * self.cell_size, dy * self.cell_size, self.cell_size, self.cell_size)
+                        )
+                        
+        
 
     def draw(self, screen):
         """
@@ -65,29 +108,14 @@ class PomPomWorld:
         screen.fill((21, 60, 74))  # Clear screen with black
         font = pygame.font.Font(None, self.cell_size - 2)  #Create a font, size slightly smaller than cell
         text_color = (0, 0, 0)
-        for bush in self.bushes:
-            if bush.cooldown == 0:  # Only draw if active
-                pygame.draw.rect(
-                    screen,
-                    (65, 255, 110),  # Brown for Bushes
-                    (bush.x * self.cell_size, bush.y * self.cell_size, self.cell_size, self.cell_size)
-                )
-        for x in range(self.width):
-            for y in range(self.height):
-                if self.grid[x][y]: #if there is a pompom in this spot
-                    pompom = self.grid[x][y]
-                    pygame.draw.rect(
-                        screen,
-                        (212, 30, 60),  # Green for living PomPoms
-                        (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
-                    )
-                    energy_text = font.render(str(pompom.energy), True, text_color)
-                    text_rect = energy_text.get_rect(center=(
-                        x * self.cell_size + self.cell_size // 2,
-                        y * self.cell_size + self.cell_size // 2
-                    ))
-                    screen.blit(energy_text, text_rect)
+
+        self.drawBushes(screen)
+        self.drawPomPoms(screen,font,text_color)
+        self.drawVisableTiles(screen)
+        
         pygame.display.flip() #update the screen
+
+
 
     def drawVISIONTESTER(self, screen):
         """
@@ -96,26 +124,9 @@ class PomPomWorld:
         screen.fill((21, 60, 74))  # Clear screen with black
         font = pygame.font.Font(None, self.cell_size - 2)  #Create a font, size slightly smaller than cell
         text_color = (0, 0, 0)
-        for bush in self.bushes:
-            if bush.cooldown == 0:  # Only draw if active
-                pygame.draw.rect(
-                    screen,
-                    (65, 255, 110),  # Brown for Bushes
-                    (bush.x * self.cell_size, bush.y * self.cell_size, self.cell_size, self.cell_size)
-                )
-        for x in range(self.width):
-            for y in range(self.height):
-                if self.grid[x][y]: #if there is a pompom in this spot
-                    pompom = self.grid[x][y]
-                    pygame.draw.rect(
-                        screen,
-                        (212, 30, 60),  # Green for living PomPoms
-                        (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
-                    )
-                    energy_text = font.render(str(pompom.energy), True, text_color)
-                    text_rect = energy_text.get_rect(center=(
-                        x * self.cell_size + self.cell_size // 2,
-                        y * self.cell_size + self.cell_size // 2
-                    ))
-                    screen.blit(energy_text, text_rect)
+
+        self.drawPomPoms(screen,font,text_color)
+        
         pygame.display.flip() #update the screen
+
+    

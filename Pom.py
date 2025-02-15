@@ -11,12 +11,13 @@ class PomPom(object):
         self.x = x
         self.y = y
         self.energy = 10
-        directions = {'N': (0, -1),'NE': (-1, -1),
-                      'E': (-1, 0),'SE': (-1, 1),
-                      'S': (0, 1),'SW': (1, 1),
-                      'W': (1, 0),'NW': (1, -1)}
+        directions = {'N': (0, -1),
+                      'E': (-1, 0),
+                      'S': (0, 1),
+                      'W': (1, 0)}
         #self.facing = random.choice(directions) #start facing a random direction
         self.facing = 'N'
+        self.visableTiles = []
         
 
 
@@ -40,8 +41,6 @@ class PomPom(object):
             (0, 0),  # Stay in place
             (-1, 0), (1, 0),  # Left, Right
             (0, -1), (0, 1),  # Up, Down
-            (-1, -1), (1, 1),  # Diagonal Top Left, Bottom Right
-            (-1, 1), (1, -1)   # Diagonal Bottom Left, Top Right
         ]
 
         dx, dy = random.choice(moves)  # Pick a random direction
@@ -56,26 +55,26 @@ class PomPom(object):
 
     def vision(self, size):
         """
-        returns a list of grid spots that the pompom can currently see
-        Size should ALWAYS be an odd number
+        Updates the visableTiles list of grid spots that the PomPom can currently see.
+        Size should ALWAYS be an odd number.
         """
-        visableTiles = [] #list of visable tiles
-        #find the center of the vision rectangle relative to the pom pom
-        visCenter = int(size/2)+1 #for finding the center
-        visCenterExp = int(size/2) #for finding the corner
-        visCenterDirections = {'N': (0, -(visCenter)),'NE': (-(visCenter), -(visCenter)),
-                      'E': (-(visCenter), 0),'SE': (-(visCenter), visCenter),
-                      'S': (0, visCenter),'SW': (visCenter, visCenter),
-                      'W': (visCenter, 0),'NW': (visCenter, -visCenter)}
+        visableTiles = []  # List of visible tiles
+        visCenter = size // 2 + 1  #Finding the center
+        visCenterExp = size // 2   #Finding the corner
+        visCenterDirections = {
+            'N': (0, -visCenter),
+            'E': (-visCenter, 0), 
+            'S': (0, visCenter), 
+            'W': (visCenter, 0)
+        }
         dx, dy = visCenterDirections[self.facing]
-        #top left corner of vision rectangle values, true to grid
-        corner_x, corner_y = self.x + dx + visCenterExp, self.y + dy + visCenterExp
+        # Top-left corner of vision rectangle
+        corner_x, corner_y = self.x + dx - visCenterExp, self.y + dy - visCenterExp
         for i in range(size):
             for j in range(size):
-                visableTiles.add((corner_x+i,corner_y+j))
-        return visableTiles
-        
-    
+                visableTiles.append((corner_x + i, corner_y + j))
+        self.visableTiles = visableTiles
+
 
     def eat(self):
         """
