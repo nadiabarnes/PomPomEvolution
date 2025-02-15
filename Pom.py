@@ -11,12 +11,8 @@ class PomPom(object):
         self.x = x
         self.y = y
         self.energy = 10
-        directions = {'N': (0, -1),
-                      'E': (-1, 0),
-                      'S': (0, 1),
-                      'W': (1, 0)}
-        #self.facing = random.choice(directions) #start facing a random direction
-        self.facing = 'N'
+        self.directions = ['N','E','S','W']
+        self.facing = random.choice(self.directions)
         self.visableTiles = []
         
 
@@ -37,15 +33,16 @@ class PomPom(object):
         Moves the PomPom to a random adjacent tile or stays in place.
         Ensures it does not move out of bounds.
         """
-        moves = [
-            (0, 0),  # Stay in place
-            (-1, 0), (1, 0),  # Left, Right
-            (0, -1), (0, 1),  # Up, Down
-        ]
+        moves = {'N': (0, -1),
+                 'E': (-1, 0),
+                 'S': (0, 1),
+                 'W': (1, 0)}
 
-        dx, dy = random.choice(moves)  # Pick a random direction
+        moveChoice = random.choice(list(moves.items()))  # Pick a (key, value) pair
+        facing, (dx, dy) = moveChoice  # Extract direction and movement tuple
+        self.facing = facing  # Store the chosen direction
+
         new_x, new_y = self.x + dx, self.y + dy
-
         # Ensure movement stays within bounds
         if 0 <= new_x < width and 0 <= new_y < height:
             self.x, self.y = new_x, new_y

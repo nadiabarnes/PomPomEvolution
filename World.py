@@ -117,16 +117,4 @@ class PomPomWorld:
 
 
 
-    def drawVISIONTESTER(self, screen):
-        """
-        Draw the grid and PomPoms
-        """
-        screen.fill((21, 60, 74))  # Clear screen with black
-        font = pygame.font.Font(None, self.cell_size - 2)  #Create a font, size slightly smaller than cell
-        text_color = (0, 0, 0)
-
-        self.drawPomPoms(screen,font,text_color)
-        
-        pygame.display.flip() #update the screen
-
     
