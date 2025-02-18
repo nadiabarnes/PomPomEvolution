@@ -12,7 +12,7 @@ def main():
     world = PomPomWorld() 
     screen = pygame.display.set_mode((world.width * world.cell_size, world.height * world.cell_size))
     pygame.display.set_caption("PomPom Evolution")
-
+    
     running = True
     clock = pygame.time.Clock()
 
