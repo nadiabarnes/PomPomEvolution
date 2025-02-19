@@ -20,6 +20,9 @@ class PomPom(object):
         self.rect = pygame.Rect(x, y, 1, 1)
         movePatterns = ["random","roomba"]
         self.movePattern = random.choice(movePatterns)
+        foodTypes = ["herbavore","carnivore","omnivore"]
+        self.foodType = random.choice(foodTypes)
+        self.mateReady = False
         
 
     def update(self):
@@ -78,16 +81,15 @@ class PomPom(object):
         closest_bush = None
         min_distance = float('inf')
         dx, dy = 0, 0  # Default movement direction (no movement)
-
         # Check all bushes to see if they are within the PomPom's visible tiles
         for bush in bushes:
             bush_rect = bush.rect  #call
             if bush_rect.colliderect(self.vis):  #Check if bush is in visible area #haha
+                #TODO calculate distance better
                 distance = self.rect.centerx - bush_rect.centerx + self.rect.centery - bush_rect.centery
                 if (abs(distance) < min_distance) and (bush.cooldown == 0):
                     min_distance = abs(distance)
                     closest_bush = bush
-
         if closest_bush:
             bushx, bushy = closest_bush.rect.x, closest_bush.rect.y #cloesest bush coords
             #xory is positive if the bush is closer on the x axis, negative for y
@@ -106,7 +108,6 @@ class PomPom(object):
                 self.rect = new_rect
             else:
                 self.genericMove(width, height)  # If pathfinding leads outside, move randomly
-
         else:
             self.genericMove(width, height)  # If no bush found, move randomly
     
@@ -171,3 +172,48 @@ class PomPom(object):
         when the pom encounters food, increase it's energy
         """
         self.energy = self.energy + 10 #change value?
+
+    
+    def findMate(self, width, height, pompoms):
+        """
+        if the pompom has enough energy, try to reproduce
+        """
+        if self.energy < 50: #energy threshold for prioritizing mating
+            self.mateReady = False
+            pass
+        closest_pom = None
+        min_distance = float('inf')
+        dx, dy = 0, 0  # Default movement direction (no movement)
+
+        # Check all poms to see if they are within the PomPom's visible tiles
+        for pom in pompoms:
+            pom_rect = pom.rect  #call
+            if pom_rect.colliderect(self.vis):  #Check if pom is in visible area
+                distance = self.rect.centerx - pom_rect.centerx + self.rect.centery - pom_rect.centery
+                if (abs(distance) < min_distance) and (pom.cooldown == 0):
+                    min_distance = abs(distance)
+                    closest_pom = pom
+
+        if closest_pom:
+            pomx, pomy = closest_pom.rect.x, closest_pom.rect.y #cloesest bush coords
+            #xory is positive if the bush is closer on the x axis, negative for y
+            xory = abs(self.rect.x - pomx) - abs(self.rect.y - pomy)
+            if (self.rect.x - pomx) != 0 and (xory>1): #if bush is not lined up on x axis with pom
+                dx = numpy.sign(self.rect.x - pomx)*(-1) #move closer on x axis
+            elif self.rect.y - pomy != 0: #same for ys
+                dy = numpy.sign(self.rect.y - pomy)*(-1)
+            else: dx = numpy.sign(self.rect.x - pomx)*(-1)
+            
+            # Move the PomPom
+            new_rect = self.rect.move(dx, dy)
+
+            if 0 <= new_rect.x < width and 0 <= new_rect.y < height:
+                self.updateFacing(self.rect.x, self.rect.y, new_rect.x, new_rect.y)
+                self.rect = new_rect
+            else:
+                self.genericMove(width, height)  # If pathfinding leads outside, move randomly
+
+        else:
+            self.genericMove(width, height)  # If no bush found, move randomly
+    
+

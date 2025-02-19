@@ -18,10 +18,12 @@ class PomPomWorld:
         self.cell_size = cell_size #pop up window size
         self.grid = [[None for _ in range(height)] for _ in range(width)] #creates an empty grid
         self.bushes = []
+        self.pompoms = []
 
-        for _ in range(2):  #num of starting pompoms
+        for _ in range(1):  #num of starting pompoms
             x, y = random.randint(0, width - 1), random.randint(0, height - 1)
             self.grid[x][y] = PomPom(x, y)
+            self.pompoms.append(self.grid[x][y])
         
         for _ in range(20):  # Starting num bushes
             x, y = random.randint(0, width - 1), random.randint(0, height - 1)
