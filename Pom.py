@@ -76,7 +76,6 @@ class PomPom(object):
 
 
     def vision(self, size):
-        newVision = pygame.Rect(0,0,size,size)
         visCenter = size // 2
 
         visCenterDirections = {
@@ -85,15 +84,15 @@ class PomPom(object):
             'S': (0, visCenter),     # South
             'W': (visCenter, 0)      # West
         }
-        
         # Directional offset (dx, dy) for the current facing
         dx, dy = visCenterDirections[self.facing]
-        
-        # Top-left corner of the vision rectangle
-        corner_x = self.rect.x + dx
-        corner_y = self.rect.y + dy
-        self.vis = newVision.move(corner_x,corner_y)
-
+        # Create vision rectangle centered on PomPom's current position
+        self.vis = pygame.Rect(
+            self.rect.x - visCenter + dx,
+            self.rect.y - visCenter + dy,
+            size,
+            size
+        )
 
 
 

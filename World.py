@@ -44,7 +44,6 @@ class PomPomWorld:
             for y in range(self.height):
                 if self.grid[x][y]:  # If there's a PomPom in this position
                     pompom = self.grid[x][y]
-                    pompom.vision(3)
                     pompom.seekBushes(self.width, self.height, self.bushes)  # Move the PomPom
                     pompom.vision(3)
                     #pompom.randomMove(self.width,self.height) #move randomly
@@ -63,7 +62,6 @@ class PomPomWorld:
 
 
 #-------------------------------------------------------------------------------
-#turn into new class at some point
     
     def drawBushes(self, screen):
         for bush in self.bushes:
@@ -109,8 +107,6 @@ class PomPomWorld:
                         ),
                         2
                     )
-                        
-        
 
     def draw(self, screen):
         """
