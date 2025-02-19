@@ -92,10 +92,7 @@ class PomPom(object):
         # Top-left corner of the vision rectangle
         corner_x = self.rect.x + dx
         corner_y = self.rect.y + dy
-        newVision.move(corner_x,corner_y)
-        self.vis = newVision
-
-
+        self.vis = newVision.move(corner_x,corner_y)
 
 
 

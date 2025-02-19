@@ -63,7 +63,7 @@ class PomPomWorld:
 
 
 #-------------------------------------------------------------------------------
-#turn into new class
+#turn into new class at some point
     
     def drawBushes(self, screen):
         for bush in self.bushes:
@@ -97,13 +97,18 @@ class PomPomWorld:
         for x in range(self.width):
             for y in range(self.height):
                 if self.grid[x][y]:  # If there is a PomPom in this spot
-                    visableTiles = self.grid[x][y].visableTiles  # That PomPom's current visible tiles
-                    for dx, dy in visableTiles:  # Iterate correctly
-                        pygame.draw.rect(
-                            screen,
-                            (255, 255, 255),  # White for visible tiles
-                            (dx * self.cell_size, dy * self.cell_size, self.cell_size, self.cell_size)
-                        )
+                    pompom = self.grid[x][y]
+                    pygame.draw.rect(
+                        screen,
+                        (255, 255, 255),
+                        pygame.Rect(
+                            pompom.vis.x * self.cell_size,
+                            pompom.vis.y * self.cell_size,
+                            pompom.vis.width * self.cell_size,
+                            pompom.vis.height * self.cell_size
+                        ),
+                        2
+                    )
                         
         
 
