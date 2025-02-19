@@ -19,7 +19,7 @@ class PomPomWorld:
         self.grid = [[None for _ in range(height)] for _ in range(width)] #creates an empty grid
         self.bushes = []
 
-        for _ in range(5):  #num of starting pompoms
+        for _ in range(2):  #num of starting pompoms
             x, y = random.randint(0, width - 1), random.randint(0, height - 1)
             self.grid[x][y] = PomPom(x, y)
         
@@ -39,6 +39,7 @@ class PomPomWorld:
             bush.update()
     
     def updatePomPoms(self):
+        #TODO add safeguard from pompoms going onto same tile
         new_grid = [[None for _ in range(self.height)] for _ in range(self.width)]
         for x in range(self.width):
             for y in range(self.height):
@@ -62,6 +63,20 @@ class PomPomWorld:
 
 
 #-------------------------------------------------------------------------------
+
+    def draw(self, screen):
+        """
+        Draw the grid and PomPoms
+        """
+        screen.fill((21, 60, 74))  # Clear screen with black
+        font = pygame.font.Font(None, self.cell_size - 2)  #Create a font, size slightly smaller than cell
+        text_color = (0, 0, 0)
+
+        #self.drawVisableTiles(screen)
+        self.drawBushes(screen)
+        self.drawPomPoms(screen,font,text_color)
+        
+        pygame.display.flip() #update the screen
 
     
     def drawBushes(self, screen):
@@ -108,20 +123,6 @@ class PomPomWorld:
                         ),
                         2
                     )
-
-    def draw(self, screen):
-        """
-        Draw the grid and PomPoms
-        """
-        screen.fill((21, 60, 74))  # Clear screen with black
-        font = pygame.font.Font(None, self.cell_size - 2)  #Create a font, size slightly smaller than cell
-        text_color = (0, 0, 0)
-
-        self.drawVisableTiles(screen)
-        self.drawBushes(screen)
-        self.drawPomPoms(screen,font,text_color)
-        
-        pygame.display.flip() #update the screen
 
 
 

@@ -68,16 +68,19 @@ class PomPom(object):
             bush_rect = bush.rect  #call
             if bush_rect.colliderect(self.vis):  #Check if bush is in visible area #haha
                 distance = self.rect.centerx - bush_rect.centerx + self.rect.centery - bush_rect.centery
-                if (abs(distance) < min_distance) & (bush.cooldown == 0):
+                if (abs(distance) < min_distance) and (bush.cooldown == 0):
                     min_distance = abs(distance)
                     closest_bush = bush
-        
+
         if closest_bush:
             bushx, bushy = closest_bush.rect.x, closest_bush.rect.y #cloesest bush coords
-            if self.rect.x - bushx != 0: #if bush is not lined up on x axis with pom
+            #xory is positive if the bush is closer on the x axis, negative for y
+            xory = abs(self.rect.x - bushx) - abs(self.rect.y - bushy)
+            if (self.rect.x - bushx) != 0 and (xory>1): #if bush is not lined up on x axis with pom
                 dx = numpy.sign(self.rect.x - bushx)*(-1) #move closer on x axis
             elif self.rect.y - bushy != 0: #same for ys
                 dy = numpy.sign(self.rect.y - bushy)*(-1)
+            else: dx = numpy.sign(self.rect.x - bushx)*(-1)
             
             # Move the PomPom
             new_rect = self.rect.move(dx, dy)
