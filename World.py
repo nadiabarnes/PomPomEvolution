@@ -19,7 +19,7 @@ class PomPomWorld:
         self.grid = [[None for _ in range(height)] for _ in range(width)] #creates an empty grid
         self.bushes = []
 
-        for _ in range(2):  #num of starting pompoms
+        for _ in range(1):  #num of starting pompoms
             x, y = random.randint(0, width - 1), random.randint(0, height - 1)
             self.grid[x][y] = PomPom(x, y)
         
@@ -62,6 +62,7 @@ class PomPomWorld:
 
 
 #-------------------------------------------------------------------------------
+
     
     def drawBushes(self, screen):
         for bush in self.bushes:

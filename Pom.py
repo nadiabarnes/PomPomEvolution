@@ -28,6 +28,7 @@ class PomPom(object):
     
 
     def randomMove(self, width, height):
+        print("random")
         """
         Moves the PomPom towards food (if found), or makes a random move if no food is visible.
         Ensures it does not move out of bounds and updates the facing direction correctly.
@@ -46,6 +47,9 @@ class PomPom(object):
             self.rect = new_rect
         else:
             self.randomMove(width, height)
+    
+    def moveForward(self, width, height):
+        pass
         
 
     def seekBushes(self, width, height, bushes):
@@ -56,13 +60,22 @@ class PomPom(object):
         # Check all bushes to see if they are within the PomPom's visible tiles
         for bush in bushes:
             bush_rect = bush.rect  #call
-            if bush_rect.colliderect(self.vis):  #Check if bush is in visible area
+            if bush_rect.colliderect(self.vis):  #Check if bush is in visible area #haha
                 distance = self.rect.centerx - bush_rect.centerx + self.rect.centery - bush_rect.centery
                 if abs(distance) < min_distance:
                     min_distance = abs(distance)
                     closest_bush = bush
-                    #print(str(closest_bush))
-
+        
+        if closest_bush:
+            bushx, bushy = closest_bush.rect.x, closest_bush.rect.y #cloesest bush coords
+            if self.rect.x - bushx != 0: #if bush is not lined up on x axis with pom
+                print("pathfinding x")
+                dx = self.rect.x - bushx #move closer on x axis
+            elif self.rect.y - bushy != 0: #same for ys
+                print("pathfinding y")
+                dy = self.rect.y - bushy
+            
+            dx, dy = self.rect.x+dx, self.rect.y+dy
             # Move the PomPom
             new_rect = self.rect.move(dx, dy)
 
@@ -70,6 +83,7 @@ class PomPom(object):
                 self.rect = new_rect
             else:
                 self.randomMove(width, height)  # If pathfinding leads outside, move randomly
+
         else:
             self.randomMove(width, height)  # If no bush found, move randomly
 
