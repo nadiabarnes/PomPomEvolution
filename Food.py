@@ -1,9 +1,9 @@
+import pygame
 
 class Bush:
     
     def __init__(self, x, y):
-        self.x = x
-        self.y = y
+        self.rect = pygame.Rect(x, y, 1, 1)
         self.cooldown = 0
         
     def eaten(self):

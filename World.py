@@ -19,11 +19,11 @@ class PomPomWorld:
         self.grid = [[None for _ in range(height)] for _ in range(width)] #creates an empty grid
         self.bushes = []
 
-        for _ in range(10):  #num of starting pompoms
+        for _ in range(2):  #num of starting pompoms
             x, y = random.randint(0, width - 1), random.randint(0, height - 1)
             self.grid[x][y] = PomPom(x, y)
         
-        for _ in range(10):  # Starting num bushes
+        for _ in range(20):  # Starting num bushes
             x, y = random.randint(0, width - 1), random.randint(0, height - 1)
             self.bushes.append(Bush(x, y))
 
@@ -44,20 +44,26 @@ class PomPomWorld:
             for y in range(self.height):
                 if self.grid[x][y]:  # If there's a PomPom in this position
                     pompom = self.grid[x][y]
-                    pompom.move(self.width, self.height)  # Move the PomPom
-                    pompom.vision(3) #odd number
+                    pompom.vision(3)
+                    pompom.seekBushes(self.width, self.height, self.bushes)  # Move the PomPom
+                    pompom.vision(3)
+                    #pompom.randomMove(self.width,self.height) #move randomly
                     # Check if the PomPom lands on a Bush
                     for bush in self.bushes:
-                        if pompom.x == bush.x and pompom.y == bush.y and bush.cooldown == 0:
+                        if pompom.rect.x == bush.rect.x and pompom.rect.y == bush.rect.y and bush.cooldown == 0:
                             pompom.eat()  # Gain energy from eating
                             bush.eaten()  # Put bush on cooldown
                     # PomPom loses energy per turn
                     if not pompom.update():  # If it dies, don't add to the new grid
                         continue
                     # Place PomPom in new grid
-                    new_grid[pompom.x][pompom.y] = pompom
+                    new_grid[pompom.rect.x][pompom.rect.y] = pompom
         # Update the grid with the new positions
         self.grid = new_grid 
+
+
+#-------------------------------------------------------------------------------
+#turn into new class
     
     def drawBushes(self, screen):
         for bush in self.bushes:
@@ -65,7 +71,7 @@ class PomPomWorld:
                 pygame.draw.rect(
                     screen,
                     (65, 255, 110),  # Brown for Bushes
-                    (bush.x * self.cell_size, bush.y * self.cell_size, self.cell_size, self.cell_size)
+                    (bush.rect.x * self.cell_size, bush.rect.y * self.cell_size, self.cell_size, self.cell_size)
                 )
     
     def drawPomPoms(self, screen, font, text_color):
@@ -109,9 +115,9 @@ class PomPomWorld:
         font = pygame.font.Font(None, self.cell_size - 2)  #Create a font, size slightly smaller than cell
         text_color = (0, 0, 0)
 
+        self.drawVisableTiles(screen)
         self.drawBushes(screen)
         self.drawPomPoms(screen,font,text_color)
-        self.drawVisableTiles(screen)
         
         pygame.display.flip() #update the screen
 
