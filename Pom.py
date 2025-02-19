@@ -1,5 +1,8 @@
 import random
 import pygame
+import numpy
+import math
+import Food
 
 class PomPom(object):
     """
@@ -28,7 +31,6 @@ class PomPom(object):
     
 
     def randomMove(self, width, height):
-        print("random")
         """
         Moves the PomPom towards food (if found), or makes a random move if no food is visible.
         Ensures it does not move out of bounds and updates the facing direction correctly.
@@ -40,7 +42,7 @@ class PomPom(object):
                     'W': (1, 0)}
         moveChoice = random.choice(list(moves.items()))  # Pick a (key, value) pair
         facing, (dx, dy) = moveChoice  # Extract direction and movement tuple
-        self.facing = facing  # Store the chosen direction
+        self.facing = facing  # Store the chosen direction #TODO use self.updateFacing
         new_rect = self.rect.move(dx, dy)
         # Ensure movement stays within bounds
         if 0 <= new_rect.x < width and 0 <= new_rect.y < height:
@@ -48,9 +50,13 @@ class PomPom(object):
         else:
             self.randomMove(width, height)
     
+
+
     def moveForward(self, width, height):
+        #TODO
         pass
-        
+
+
 
     def seekBushes(self, width, height, bushes):
         closest_bush = None
@@ -62,34 +68,54 @@ class PomPom(object):
             bush_rect = bush.rect  #call
             if bush_rect.colliderect(self.vis):  #Check if bush is in visible area #haha
                 distance = self.rect.centerx - bush_rect.centerx + self.rect.centery - bush_rect.centery
-                if abs(distance) < min_distance:
+                if (abs(distance) < min_distance) & (bush.cooldown == 0):
                     min_distance = abs(distance)
                     closest_bush = bush
         
         if closest_bush:
             bushx, bushy = closest_bush.rect.x, closest_bush.rect.y #cloesest bush coords
             if self.rect.x - bushx != 0: #if bush is not lined up on x axis with pom
-                print("pathfinding x")
-                dx = self.rect.x - bushx #move closer on x axis
+                dx = numpy.sign(self.rect.x - bushx)*(-1) #move closer on x axis
             elif self.rect.y - bushy != 0: #same for ys
-                print("pathfinding y")
-                dy = self.rect.y - bushy
+                dy = numpy.sign(self.rect.y - bushy)*(-1)
             
-            dx, dy = self.rect.x+dx, self.rect.y+dy
             # Move the PomPom
             new_rect = self.rect.move(dx, dy)
 
             if 0 <= new_rect.x < width and 0 <= new_rect.y < height:
+                self.updateFacing(self.rect.x, self.rect.y, new_rect.x, new_rect.y)
                 self.rect = new_rect
             else:
                 self.randomMove(width, height)  # If pathfinding leads outside, move randomly
 
         else:
             self.randomMove(width, height)  # If no bush found, move randomly
+    
+
+
+    def updateFacing(self, oldx, oldy, newx, newy):
+        """
+        Import original and updated coordinates, updates the pompom's facing variable
+        """
+        dx = oldx-newx
+        dy = oldy - newy
+        if dx > 0:
+            self.facing = 'E'
+        elif dx < 0:
+            self.facing = 'W'
+        elif dy > 0:
+            self.facing = 'N'
+        elif dy < 0:
+            self.facing = 'S'
 
 
 
     def vision(self, size):
+        """
+        Creates a rectangle that act's as the pompom's range of sight
+        size is how long one edge of the pom pom's vision is
+        size should always be odd
+        """
         visCenter = size // 2
 
         visCenterDirections = {
@@ -107,41 +133,6 @@ class PomPom(object):
             size,
             size
         )
-
-
-
-    def visionOld(self, size):
-        """
-        Updates the visibleTiles list of grid spots that the PomPom can currently see.
-        Size should ALWAYS be an odd number.
-        """
-        visibleTiles = []  # List of visible tiles
-        visCenter = size // 2  # Center offset (size is odd, so center will be exact middle)
-        
-        # Direction offsets for N, E, S, W based on the facing direction
-        visCenterDirections = {
-            'N': (0, -visCenter),    # North
-            'E': (-visCenter, 0),    # East
-            'S': (0, visCenter),     # South
-            'W': (visCenter, 0)      # West
-        }
-        
-        # Directional offset (dx, dy) for the current facing
-        dx, dy = visCenterDirections[self.facing]
-        
-        # Top-left corner of the vision rectangle
-        corner_x = self.rect.x + dx
-        corner_y = self.rect.y + dy
-        
-        # Iterate over the vision area
-        for i in range(size):
-            for j in range(size):
-                # Calculate tile coordinates
-                tile_x = corner_x + i - visCenter
-                tile_y = corner_y + j - visCenter
-                visibleTiles.append((tile_x, tile_y))
-        
-        self.visableTiles = visibleTiles
 
 
 

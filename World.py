@@ -19,7 +19,7 @@ class PomPomWorld:
         self.grid = [[None for _ in range(height)] for _ in range(width)] #creates an empty grid
         self.bushes = []
 
-        for _ in range(1):  #num of starting pompoms
+        for _ in range(5):  #num of starting pompoms
             x, y = random.randint(0, width - 1), random.randint(0, height - 1)
             self.grid[x][y] = PomPom(x, y)
         
@@ -45,7 +45,7 @@ class PomPomWorld:
                 if self.grid[x][y]:  # If there's a PomPom in this position
                     pompom = self.grid[x][y]
                     pompom.seekBushes(self.width, self.height, self.bushes)  # Move the PomPom
-                    pompom.vision(3)
+                    pompom.vision(5)
                     #pompom.randomMove(self.width,self.height) #move randomly
                     # Check if the PomPom lands on a Bush
                     for bush in self.bushes:
