@@ -71,6 +71,10 @@ class PomPom(object):
 
 
     def seekBushes(self, width, height, bushes):
+        """
+        herbavore pompoms move towards bushes
+        If bush isn't in sight, then do generic move
+        """
         closest_bush = None
         min_distance = float('inf')
         dx, dy = 0, 0  # Default movement direction (no movement)
@@ -106,6 +110,7 @@ class PomPom(object):
         else:
             self.genericMove(width, height)  # If no bush found, move randomly
     
+
     def genericMove(self, width, height):
         """
         moves the pompom determined by = it's heritable move pattern
