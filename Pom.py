@@ -13,6 +13,7 @@ class PomPom(object):
         self.directions = ['N','E','S','W']
         self.facing = random.choice(self.directions)
         self.visableTiles = []
+        self.vis = pygame.Rect(x, y, 3, 3) #possibly initiate this better
         self.rect = pygame.Rect(x, y, 1, 1)
         
 
@@ -54,12 +55,13 @@ class PomPom(object):
 
         # Check all bushes to see if they are within the PomPom's visible tiles
         for bush in bushes:
-            bush_rect = pygame.Rect(bush.rect.x, bush.rect.y, 1, 1)  # Create a Rect for the bush
-            if bush_rect.colliderect(self.rect):  # Check if bush is in visible area
+            bush_rect = bush.rect  #call
+            if bush_rect.colliderect(self.vis):  #Check if bush is in visible area
                 distance = self.rect.centerx - bush_rect.centerx + self.rect.centery - bush_rect.centery
                 if abs(distance) < min_distance:
                     min_distance = abs(distance)
                     closest_bush = bush
+                    #print(str(closest_bush))
 
             # Move the PomPom
             new_rect = self.rect.move(dx, dy)
@@ -74,6 +76,31 @@ class PomPom(object):
 
 
     def vision(self, size):
+        newVision = pygame.Rect(0,0,size,size)
+        visCenter = size // 2
+
+        visCenterDirections = {
+            'N': (0, -visCenter),    # North
+            'E': (-visCenter, 0),    # East
+            'S': (0, visCenter),     # South
+            'W': (visCenter, 0)      # West
+        }
+        
+        # Directional offset (dx, dy) for the current facing
+        dx, dy = visCenterDirections[self.facing]
+        
+        # Top-left corner of the vision rectangle
+        corner_x = self.rect.x + dx
+        corner_y = self.rect.y + dy
+        newVision.move(corner_x,corner_y)
+        self.vis = newVision
+
+
+
+
+
+
+    def visionOld(self, size):
         """
         Updates the visibleTiles list of grid spots that the PomPom can currently see.
         Size should ALWAYS be an odd number.
