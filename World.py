@@ -33,11 +33,11 @@ class PomPomWorld:
         """
         self.updateFood()
         self.updatePomPoms()
-    
+
     def updateFood(self):
         for bush in self.bushes:
             bush.update()
-    
+
     def updatePomPoms(self):
         #TODO add safeguard from pompoms going onto same tile
         new_grid = [[None for _ in range(self.height)] for _ in range(self.width)]
@@ -72,7 +72,7 @@ class PomPomWorld:
         font = pygame.font.Font(None, self.cell_size - 2)  #Create a font, size slightly smaller than cell
         text_color = (0, 0, 0)
 
-        #self.drawVisableTiles(screen)
+        self.drawVisableTiles(screen)
         self.drawBushes(screen)
         self.drawPomPoms(screen,font,text_color)
         

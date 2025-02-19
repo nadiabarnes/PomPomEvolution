@@ -53,8 +53,18 @@ class PomPom(object):
 
 
     def moveForward(self, width, height):
-        #TODO
-        pass
+        moves = {'N': (0, -1),
+                    'E': (-1, 0),
+                    'S': (0, 1),
+                    'W': (1, 0)}
+        moveChoice = moves[self.facing]
+        (dx, dy) = moveChoice
+        new_rect = self.rect.move(dx, dy)
+        # Ensure movement stays within bounds
+        if 0 <= new_rect.x < width and 0 <= new_rect.y < height:
+            self.rect = new_rect
+        else:
+            self.randomMove(width, height)
 
 
 
@@ -89,10 +99,10 @@ class PomPom(object):
                 self.updateFacing(self.rect.x, self.rect.y, new_rect.x, new_rect.y)
                 self.rect = new_rect
             else:
-                self.randomMove(width, height)  # If pathfinding leads outside, move randomly
+                self.moveForward(width, height)  # If pathfinding leads outside, move randomly
 
         else:
-            self.randomMove(width, height)  # If no bush found, move randomly
+            self.moveForward(width, height)  # If no bush found, move randomly
     
 
 
