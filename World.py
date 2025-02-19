@@ -93,11 +93,18 @@ class PomPomWorld:
             for y in range(self.height):
                 if self.grid[x][y]: #if there is a pompom in this spot
                     pompom = self.grid[x][y]
-                    pygame.draw.rect(
-                        screen,
-                        (212, 30, 60),  # Green for living PomPoms
-                        (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
-                    )
+                    if pompom.movePattern == "random":
+                        pygame.draw.rect(
+                            screen,
+                            (212, 30, 60),  # Green for living PomPoms
+                            (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
+                        )
+                    elif pompom.movePattern == "roomba":
+                        pygame.draw.rect(
+                            screen,
+                            (16, 144, 144),  # Green for living PomPoms
+                            (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
+                        )
                     energy_text = font.render(str(pompom.energy), True, text_color)
                     text_rect = energy_text.get_rect(center=(
                         x * self.cell_size + self.cell_size // 2,

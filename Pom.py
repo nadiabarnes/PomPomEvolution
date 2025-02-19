@@ -13,11 +13,13 @@ class PomPom(object):
         #start with randomized genetic traits unless created from evolution
         #also cotains energy level and xy position
         self.energy = 10
-        self.directions = ['N','E','S','W']
-        self.facing = random.choice(self.directions)
+        directions = ['N','E','S','W']
+        self.facing = random.choice(directions)
         self.visableTiles = []
         self.vis = pygame.Rect(x, y, 3, 3) #possibly initiate this better
         self.rect = pygame.Rect(x, y, 1, 1)
+        movePatterns = ["random","roomba"]
+        self.movePattern = random.choice(movePatterns)
         
 
     def update(self):
@@ -99,10 +101,20 @@ class PomPom(object):
                 self.updateFacing(self.rect.x, self.rect.y, new_rect.x, new_rect.y)
                 self.rect = new_rect
             else:
-                self.moveForward(width, height)  # If pathfinding leads outside, move randomly
+                self.genericMove(width, height)  # If pathfinding leads outside, move randomly
 
         else:
-            self.moveForward(width, height)  # If no bush found, move randomly
+            self.genericMove(width, height)  # If no bush found, move randomly
+    
+    def genericMove(self, width, height):
+        """
+        moves the pompom determined by = it's heritable move pattern
+        """
+        if self.movePattern == "random":
+            self.randomMove(width, height)
+        elif self.movePattern== "roomba":
+            self.moveForward(width,height)
+        else: pass
     
 
 
