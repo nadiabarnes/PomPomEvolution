@@ -9,7 +9,7 @@ class PomPomWorld:
     """
     This will handle the board/world for PomPomEvolution
     """
-    def __init__(self, width=20, height=20, cell_size=20):
+    def __init__(self, width=20, height=20, cell_size=20, pomNumber = 2, bushNumber = 20):
         """
         board variables
         """
@@ -21,14 +21,14 @@ class PomPomWorld:
         self.pompoms = []
 
         #spawn in pompoms
-        for _ in range(2):  #rough num of starting pompoms
+        for _ in range(pomNumber):  #rough num of starting pompoms
             x, y = random.randint(0, width - 1), random.randint(0, height - 1)
             if not self.grid[x][y]:
                 self.grid[x][y] = PomPom(x, y)
                 self.pompoms.append(self.grid[x][y])
 
         #spawn in bushes
-        for _ in range(20):  #rough Starting num bushes
+        for _ in range(bushNumber):  #rough Starting num bushes
             x, y = random.randint(0, width - 1), random.randint(0, height - 1)
             if not self.grid[x][y]:
                 self.grid[x][y] = Bush(x, y)
@@ -50,11 +50,13 @@ class PomPomWorld:
 
     def updatePomPoms(self):
         #TODO add safeguard from pompoms going onto same tile
+        #TODO this logic should be in the pom file
         new_grid = [[None for _ in range(self.height)] for _ in range(self.width)]
         for x in range(self.width):
             for y in range(self.height):
                 if self.grid[x][y] and isinstance(self.grid[x][y], PomPom):  # If there's a PomPom in this position
                     pompom = self.grid[x][y]
+                    pompom.updateAdjacentTiles(self.width, self.height)
                     pompom.findMate(self.width, self.height, self.pompoms)
                     pompom.seekBushes(self.width, self.height, self.bushes)  # Move the PomPom
                     pompom.vision(5)
