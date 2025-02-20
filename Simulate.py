@@ -22,7 +22,7 @@ def main():
 
         world.update() 
         world.draw(screen)
-        clock.tick(2)  #2 updates per second
+        clock.tick(20)  #2 updates per second
 
     pygame.quit()
 

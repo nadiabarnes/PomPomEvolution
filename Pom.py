@@ -10,19 +10,23 @@ class PomPom(object):
     """
 
     def __init__(self, x, y):
-        #start with randomized genetic traits unless created from evolution
-        #also cotains energy level and xy position
+        #energy increases when food is eaten, decreases by 1 each turn
         self.energy = 10
+        #What tiles the pom can see, changes direction as it moves
         directions = ['N','E','S','W']
         self.facing = random.choice(directions)
-        self.visableTiles = []
-        self.vis = pygame.Rect(x, y, 3, 3) #possibly initiate this better
+        self.vis = pygame.Rect(x, y, 3, 3)
+        #the pom's tile
         self.rect = pygame.Rect(x, y, 1, 1)
+        #What the pom's generic move pattern is
         movePatterns = ["random","roomba"]
         self.movePattern = random.choice(movePatterns)
+        #What the pom considers food
         foodTypes = ["herbavore","carnivore","omnivore"]
         self.foodType = random.choice(foodTypes)
+        #the pom's mating availability
         self.mateReady = False
+        self.cooldown = 0
         
 
     def update(self):
@@ -30,6 +34,7 @@ class PomPom(object):
         Handles PomPom's behavior per turn
         """
         self.energy -= 1  # Loses energy each turn
+        self.cooldown -= 1
         if self.energy <= 0:
             return False  # Dies if energy reaches 0
         return True
@@ -78,6 +83,8 @@ class PomPom(object):
         herbavore pompoms move towards bushes
         If bush isn't in sight, then do generic move
         """
+        if self.mateReady == True:
+            return
         closest_bush = None
         min_distance = float('inf')
         dx, dy = 0, 0  # Default movement direction (no movement)
@@ -180,10 +187,11 @@ class PomPom(object):
         """
         if self.energy < 50: #energy threshold for prioritizing mating
             self.mateReady = False
-            pass
+            return
+        self.mateReady = True
         closest_pom = None
         min_distance = float('inf')
-        dx, dy = 0, 0  # Default movement direction (no movement)
+        dx, dy = 0, 0  #Default movement direction (no movement)
 
         # Check all poms to see if they are within the PomPom's visible tiles
         for pom in pompoms:
