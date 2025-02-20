@@ -9,7 +9,7 @@ class PomPomWorld:
     """
     This will handle the board/world for PomPomEvolution
     """
-    def __init__(self, width=20, height=20, cell_size=20):
+    def __init__(self, width=20, height=20, cell_size=20, pomNumber = 2, bushNumber = 20):
         """
         board variables
         """
@@ -20,15 +20,20 @@ class PomPomWorld:
         self.bushes = []
         self.pompoms = []
 
-        for _ in range(2):  #num of starting pompoms
+        #spawn in pompoms
+        for _ in range(pomNumber):  #rough num of starting pompoms
             x, y = random.randint(0, width - 1), random.randint(0, height - 1)
-            self.grid[x][y] = PomPom(x, y)
-            self.pompoms.append(self.grid[x][y])
-        
-        for _ in range(20):  # Starting num bushes
+            if not self.grid[x][y]:
+                self.grid[x][y] = PomPom(x, y)
+                self.pompoms.append(self.grid[x][y])
+
+        #spawn in bushes
+        for _ in range(bushNumber):  #rough Starting num bushes
             x, y = random.randint(0, width - 1), random.randint(0, height - 1)
-            #TODO grid should contain bushes as well, will need to change update functions
-            self.bushes.append(Bush(x, y))
+            if not self.grid[x][y]:
+                self.grid[x][y] = Bush(x, y)
+                self.bushes.append(self.grid[x][y])
+
 
     def update(self):
         """
@@ -37,17 +42,22 @@ class PomPomWorld:
         self.updateFood()
         self.updatePomPoms()
 
+
     def updateFood(self):
         for bush in self.bushes:
             bush.update()
 
+
     def updatePomPoms(self):
         #TODO add safeguard from pompoms going onto same tile
+        #TODO this logic should be in the pom file
         new_grid = [[None for _ in range(self.height)] for _ in range(self.width)]
         for x in range(self.width):
             for y in range(self.height):
-                if self.grid[x][y]:  # If there's a PomPom in this position
+                if self.grid[x][y] and isinstance(self.grid[x][y], PomPom):  # If there's a PomPom in this position
                     pompom = self.grid[x][y]
+                    pompom.updateAdjacentTiles(self.width, self.height)
+                    pompom.findMate(self.width, self.height, self.pompoms)
                     pompom.seekBushes(self.width, self.height, self.bushes)  # Move the PomPom
                     pompom.vision(5)
                     #pompom.randomMove(self.width,self.height) #move randomly
@@ -67,6 +77,7 @@ class PomPomWorld:
 
 #-------------------------------------------------------------------------------
 
+
     def draw(self, screen):
         """
         Draw the grid and PomPoms
@@ -77,7 +88,7 @@ class PomPomWorld:
 
         self.drawVisableTiles(screen)
         self.drawBushes(screen)
-        self.drawPomPoms(screen,font,text_color)
+        self.drawPomPomsMating(screen,font,text_color)
         
         pygame.display.flip() #update the screen
 
@@ -91,23 +102,40 @@ class PomPomWorld:
                     (bush.rect.x * self.cell_size, bush.rect.y * self.cell_size, self.cell_size, self.cell_size)
                 )
     
-    def drawPomPoms(self, screen, font, text_color):
+    def drawPomPomsMating(self, screen, font, text_color):
         for x in range(self.width):
             for y in range(self.height):
                 if self.grid[x][y]: #if there is a pompom in this spot
                     pompom = self.grid[x][y]
-                    if pompom.movePattern == "random":
+                    if pompom.mateReady == True:
                         pygame.draw.rect(
                             screen,
                             (212, 30, 60),  # Green for living PomPoms
                             (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
                         )
-                    elif pompom.movePattern == "roomba":
+                    elif pompom.mateReady == False:
                         pygame.draw.rect(
                             screen,
                             (16, 144, 144),  # Green for living PomPoms
                             (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
                         )
+                    energy_text = font.render(str(pompom.energy), True, text_color)
+                    text_rect = energy_text.get_rect(center=(
+                        x * self.cell_size + self.cell_size // 2,
+                        y * self.cell_size + self.cell_size // 2
+                    ))
+                    screen.blit(energy_text, text_rect)
+    
+    def drawPomPoms(self, screen, font, text_color):
+        for x in range(self.width):
+            for y in range(self.height):
+                if self.grid[x][y]: #if there is a pompom in this spot
+                    pompom = self.grid[x][y]
+                    pygame.draw.rect(
+                        screen,
+                        (212, 30, 60),  # Green for living PomPoms
+                        (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
+                    )
                     energy_text = font.render(str(pompom.energy), True, text_color)
                     text_rect = energy_text.get_rect(center=(
                         x * self.cell_size + self.cell_size // 2,
