@@ -237,10 +237,14 @@ class PomPom(object):
             self.genericMove(width, height)  # If no mate is found, move randomly
 
     def gotMated(self):
+        """
+        when a different pompom mates with you, you still loose then energy and cooldown
+        """
         self.energy -= 20  # Reduce energy
         self.cooldown = 10  # 10-round cooldown
 
     def updateAdjacentTiles(self, width, height):
+        #TODO test this
         """
         Populates a list with the coordinates of the 8 tiles surrounding the PomPom.
         """

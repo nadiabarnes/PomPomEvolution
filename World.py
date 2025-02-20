@@ -86,7 +86,7 @@ class PomPomWorld:
         font = pygame.font.Font(None, self.cell_size - 2)  #Create a font, size slightly smaller than cell
         text_color = (0, 0, 0)
 
-        #self.drawVisableTiles(screen)
+        self.drawVisableTiles(screen)
         self.drawBushes(screen)
         self.drawPomPomsMating(screen,font,text_color)
         
