@@ -20,13 +20,14 @@ class PomPomWorld:
         self.bushes = []
         self.pompoms = []
 
-        for _ in range(1):  #num of starting pompoms
+        for _ in range(2):  #num of starting pompoms
             x, y = random.randint(0, width - 1), random.randint(0, height - 1)
             self.grid[x][y] = PomPom(x, y)
             self.pompoms.append(self.grid[x][y])
         
         for _ in range(20):  # Starting num bushes
             x, y = random.randint(0, width - 1), random.randint(0, height - 1)
+            #TODO grid should contain bushes as well, will need to change update functions
             self.bushes.append(Bush(x, y))
 
     def update(self):
