@@ -24,7 +24,7 @@ class PomPomWorld:
         for _ in range(pomNumber):  #rough num of starting pompoms
             x, y = random.randint(0, width - 1), random.randint(0, height - 1)
             if not self.grid[x][y]:
-                self.grid[x][y] = PomPom(x, y)
+                self.grid[x][y] = PomPom(x, y, self.grid)
                 self.pompoms.append(self.grid[x][y])
 
         #spawn in bushes
