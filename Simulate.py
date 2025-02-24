@@ -8,7 +8,7 @@ This will actually run a simulation
 
 def main():
     pygame.init()
-    world = PomPomWorld(width=20, height=20, pomNumber = 1, bushNumber = 20) 
+    world = PomPomWorld(width=20, height=20, pomNumber = 3, bushNumber = 20) 
     screen = pygame.display.set_mode((world.width * world.cell_size, world.height * world.cell_size))
     pygame.display.set_caption("PomPom Evolution")
     
@@ -22,7 +22,7 @@ def main():
 
         world.update() 
         world.draw(screen)
-        clock.tick(1)  #2 updates per second
+        clock.tick(10)  #2 updates per second
 
     pygame.quit()
 

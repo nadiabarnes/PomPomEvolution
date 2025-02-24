@@ -164,7 +164,6 @@ class PomPom(object):
                         closest_bush = bush
 
         if closest_bush:
-            print("bush sighted")
             if self.rect.x == closest_bush.rect.x and self.rect.y == closest_bush.rect.y and closest_bush.cooldown == 0:
                 #if on top of closest bush, eat it
                 self.eat()  # Gain energy from eating
@@ -220,12 +219,12 @@ class PomPom(object):
 
     def visionTilesUpdate(self, size):
         """
-        Updates the visible tiles list
+        Updates the visible tiles list, ensuring only valid grid tiles are included.
         """
-        self.visableTiles = [] #reset
+        self.visableTiles = []  # Reset
         visibleTiles = []  # List of visible tiles
         visCenter = size // 2  # Center offset (size is odd, so center will be exact middle)
-        
+
         # Direction offsets for N, E, S, W based on the facing direction
         visCenterDirections = {
             'N': (0, -visCenter),    # North
@@ -233,23 +232,31 @@ class PomPom(object):
             'S': (0, visCenter),     # South
             'W': (visCenter, 0)      # West
         }
-        
+
         # Directional offset (dx, dy) for the current facing
         dx, dy = visCenterDirections[self.facing]
-          
+
+        # Get grid dimensions
+        grid_width = len(self.grid)
+        grid_height = len(self.grid[0]) if grid_width > 0 else 0
+
         # Top-left corner of the vision rectangle
         corner_x = self.rect.x + dx
         corner_y = self.rect.y + dy
-        
+
         # Iterate over the vision area
         for i in range(size):
             for j in range(size):
-                 # Calculate tile coordinates
+                # Calculate tile coordinates
                 tile_x = corner_x + i - visCenter
                 tile_y = corner_y + j - visCenter
-                visibleTiles.append((tile_x, tile_y))
-        
+
+                # Check if tile is within grid bounds
+                if 0 <= tile_x < grid_width and 0 <= tile_y < grid_height:
+                    visibleTiles.append((tile_x, tile_y))
+
         self.visableTiles = visibleTiles
+
 
 
 

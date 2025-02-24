@@ -31,7 +31,7 @@ class PomPomWorld:
         for _ in range(bushNumber):  #rough Starting num bushes
             x, y = random.randint(0, width - 1), random.randint(0, height - 1)
             if not self.grid[x][y]:
-                self.grid[x][y] = Bush(x, y)
+                self.grid[x][y] = Bush(x, y, self.grid)
                 self.bushes.append(self.grid[x][y])
 
 
@@ -44,8 +44,10 @@ class PomPomWorld:
 
 
     def updateFood(self):
+        new_grid = self.grid  # Keep the current grid reference
         for bush in self.bushes:
-            bush.update()
+            bush.update(new_grid)  # Update bush state
+            new_grid[bush.rect.x][bush.rect.y] = bush  # Ensure bushes persist
 
 
     def updatePomPoms(self):
@@ -76,16 +78,17 @@ class PomPomWorld:
         
         pygame.display.flip() #update the screen
 
-    
+
     def drawBushes(self, screen):
-        for bush in self.bushes:
+        for bush in self.bushes:  # Iterate over the bush list instead of scanning the entire grid
             if bush.cooldown == 0:  # Only draw if active
                 pygame.draw.rect(
                     screen,
-                    (65, 255, 110),  # Brown for Bushes
+                    (65, 255, 110),  # Green for active bushes
                     (bush.rect.x * self.cell_size, bush.rect.y * self.cell_size, self.cell_size, self.cell_size)
                 )
-    
+
+
     def drawPomPomsMating(self, screen, font, text_color):
         for x in range(self.width):
             for y in range(self.height):
