@@ -49,28 +49,12 @@ class PomPomWorld:
 
 
     def updatePomPoms(self):
-        #TODO add safeguard from pompoms going onto same tile
-        #TODO this logic should be in the pom file
         new_grid = [[None for _ in range(self.height)] for _ in range(self.width)]
-        for x in range(self.width):
-            for y in range(self.height):
-                if self.grid[x][y] and isinstance(self.grid[x][y], PomPom):  # If there's a PomPom in this position
-                    pompom = self.grid[x][y]
-                    pompom.updateAdjacentTiles(self.width, self.height)
-                    pompom.findMate(self.width, self.height, self.pompoms)
-                    pompom.seekBushes(self.width, self.height, self.bushes)  # Move the PomPom
-                    pompom.vision(5)
-                    #pompom.randomMove(self.width,self.height) #move randomly
-                    # Check if the PomPom lands on a Bush
-                    for bush in self.bushes:
-                        if pompom.rect.x == bush.rect.x and pompom.rect.y == bush.rect.y and bush.cooldown == 0:
-                            pompom.eat()  # Gain energy from eating
-                            bush.eaten()  # Put bush on cooldown
-                    # PomPom loses energy per turn
-                    if not pompom.update():  # If it dies, don't add to the new grid
-                        continue
-                    # Place PomPom in new grid
-                    new_grid[pompom.rect.x][pompom.rect.y] = pompom
+        for pompom in self.pompoms:
+            if not pompom.update(self.grid):  # If it dies, don't add to the new grid
+                continue
+            # Place PomPom in new grid
+            new_grid[pompom.rect.x][pompom.rect.y] = pompom
         # Update the grid with the new positions
         self.grid = new_grid 
 
