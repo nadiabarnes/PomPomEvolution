@@ -3,6 +3,7 @@ import pygame
 import numpy
 import math
 from Food import Bush
+from Evo import Evolution
 
 class PomPom(object):
     """
@@ -51,7 +52,7 @@ class PomPom(object):
         if self.energy < 30 or self.cooldown > 0:
             self.mateReady = False
         if self.energy <= 0:
-            return False  # Dies if energy reaches 0
+            return self.grid  # don't do anyhthing if dead
         
         self.findMate(len(self.grid), len(self.grid)) 
         self.seekBushes(len(self.grid), len(self.grid))
@@ -59,7 +60,7 @@ class PomPom(object):
         self.vision(5)
         self.visionTilesUpdate(5)
 
-        return True
+        return self.grid
     
 
     def updateAdjacentTiles(self, width, height):
@@ -106,8 +107,7 @@ class PomPom(object):
             # If the mate is adjacent, stay still, mate, and enter cooldown
             if (pomx, pomy) in self.adjacent_tiles:
                 dx, dy = 0, 0
-                self.energy -= 20  # Reduce energy
-                self.cooldown = 10  # 10-round cooldown
+                self.successfulMate(closest_pom)
                 closest_pom.gotMated()
                 return  # Exit function after mating
 
@@ -127,10 +127,18 @@ class PomPom(object):
                 self.rect = new_rect
             else:
                 self.genericMove(width, height)  # If pathfinding leads outside, move randomly
-
         else:
             self.genericMove(width, height)  # If no mate is found, move randomly
     
+
+    def successfulMate(self, mate):
+        print("successful mate!")
+        self.energy -= 20  # Reduce energy
+        self.cooldown = 10
+        evolution = Evolution(self, mate, self.grid)
+        evoGrid = evolution.spawnBabies()
+        self.grid = evoGrid #update the grid
+
 
     def gotMated(self):
         """
@@ -138,7 +146,6 @@ class PomPom(object):
         """
         self.energy -= 20  # Reduce energy
         self.cooldown = 10  # 10-round cooldown
-
 
     
     def seekBushes(self, width, height):
@@ -259,7 +266,6 @@ class PomPom(object):
 
 
 
-
     def genericMove(self, width, height):
         """
         moves the pompom determined by = it's heritable move pattern
@@ -294,6 +300,10 @@ class PomPom(object):
 
 
     def moveForward(self, width, height):
+        """
+        Roomba Style Movement. move in direction pom is facing,
+        turn a random direction if cannot move forward
+        """
         moves = {'N': (0, -1),
                     'E': (-1, 0),
                     'S': (0, 1),

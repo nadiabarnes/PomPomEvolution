@@ -53,12 +53,19 @@ class PomPomWorld:
     def updatePomPoms(self):
         new_grid = [[None for _ in range(self.height)] for _ in range(self.width)]
         for pompom in self.pompoms:
-            if not pompom.update(self.grid):  # If it dies, don't add to the new grid
+            pompom.update(self.grid)
+            if pompom.energy==0:  # If it dies, don't add to the new grid
                 continue
             # Place PomPom in new grid
             new_grid[pompom.rect.x][pompom.rect.y] = pompom
-        # Update the grid with the new positions
-        self.grid = new_grid 
+        self.grid = new_grid # Update the grid with the new positions
+        #necessary for adding baby poms to the lists
+        for x in range(self.width):
+            for y in range(self.height):
+                if self.grid[x][y]: #if there is a pompom in this spot
+                    pom = self.grid[x][y]
+                    if isinstance(pom, PomPom) and pom not in self.pompoms:
+                        self.pompoms.append(pom)
 
 
 #-------------------------------------------------------------------------------
@@ -135,7 +142,7 @@ class PomPomWorld:
     def drawVisableTiles(self, screen):
         for x in range(self.width):
             for y in range(self.height):
-                if self.grid[x][y]:  # If there is a PomPom in this spot
+                if self.grid[x][y] and isinstance(self.grid[x][y], PomPom):  # Ensure it's a PomPom
                     pompom = self.grid[x][y]
                     pygame.draw.rect(
                         screen,
@@ -148,6 +155,7 @@ class PomPomWorld:
                         ),
                         2
                     )
+
 
 
 
