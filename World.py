@@ -51,24 +51,35 @@ class PomPomWorld:
 
 
     def updatePomPoms(self):
-        #TODO dead pompoms are still on the grid, just not being drawn
+        # Temporary new grid to hold PomPoms
         new_grid = [[None for _ in range(self.height)] for _ in range(self.width)]
+        new_pompoms = []  # To store PomPoms that are still alive
+
         for pompom in self.pompoms:
-            pompom.update(self.grid)
-            if pompom.energy==0:  # If it dies, don't add to the new grid
-                continue
-            # Place PomPom in new grid
+            pompom.update(self.grid)  # Update PomPom behavior
+
+            if pompom.energy == 0:  # If it dies, don't add to the new grid
+                continue  # Skip dead PomPom
+
+            # Place the alive PomPom in the new grid
             new_grid[pompom.rect.x][pompom.rect.y] = pompom
 
-            #necessary for adding baby poms to the lists
+            # Add to new_pompoms list
+            new_pompoms.append(pompom)
+
+            # Add baby PomPoms to the lists if needed
             for x in range(self.width):
                 for y in range(self.height):
-                    if pompom.grid[x][y]: #if there is a pompom in this spot
+                    if pompom.grid[x][y]:  # If there's a PomPom in this spot
                         pom = self.grid[x][y]
                         if isinstance(pom, PomPom) and pom not in self.pompoms:
                             self.pompoms.append(pom)
 
-        self.grid = new_grid # Update the grid with the new positions
+        # Replace the old list of PomPoms with the new list (excluding dead ones)
+        self.pompoms = new_pompoms
+
+        # Update the grid with the new positions
+        self.grid = new_grid
 
 #-------------------------------------------------------------------------------
 
@@ -81,7 +92,7 @@ class PomPomWorld:
         font = pygame.font.Font(None, self.cell_size - 2)  #Create a font, size slightly smaller than cell
         text_color = (0, 0, 0)
 
-        self.drawVisableTiles(screen)
+        #self.drawVisableTiles(screen)
         self.drawBushes(screen)
         self.drawPomPomsMating(screen,font,text_color)
         

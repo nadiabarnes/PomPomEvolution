@@ -8,7 +8,7 @@ This will actually run a simulation
 
 def main():
     pygame.init()
-    world = PomPomWorld(width=20, height=20, pomNumber = 3, bushNumber = 100) 
+    world = PomPomWorld(width=20, height=20, pomNumber = 10, bushNumber = 40) 
     screen = pygame.display.set_mode((world.width * world.cell_size, world.height * world.cell_size))
     pygame.display.set_caption("PomPom Evolution")
     
