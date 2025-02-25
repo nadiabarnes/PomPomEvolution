@@ -44,6 +44,7 @@ class PomPom(object):
         """
         Handles PomPom's behavior per turn
         """
+        #TODO death doesn't work properly
         self.grid = grid #match pom's grid to current grid
         self.energy -= 1  # Loses energy each turn
         self.cooldown -= 1
@@ -68,7 +69,7 @@ class PomPom(object):
         """
         Populates a list with the coordinates of the 8 tiles surrounding the PomPom.
         """
-        self.adjacent_tiles = []  # Reset adjacent tiles list
+        self.adjacentTiles = []  # Reset adjacent tiles list
         directions = [(-1, -1), (0, -1), (1, -1),  # Top-left, Top, Top-right
                     (-1, 0), (1, 0),  # Left, Right
                     (-1, 1), (0, 1), (1, 1)]  # Bottom-left, Bottom, Bottom-right
@@ -76,7 +77,7 @@ class PomPom(object):
         for dx, dy in directions:
             new_x, new_y = self.rect.x + dx, self.rect.y + dy
             if 0 <= new_x < width and 0 <= new_y < height:  # Ensure within bounds
-                self.adjacent_tiles.append((new_x, new_y))
+                self.adjacentTiles.append((new_x, new_y))
 
     
     def findMate(self, width, height):
@@ -105,7 +106,7 @@ class PomPom(object):
             pomx, pomy = closest_pom.rect.x, closest_pom.rect.y  # Closest mate's coordinates
 
             # If the mate is adjacent, stay still, mate, and enter cooldown
-            if (pomx, pomy) in self.adjacent_tiles:
+            if (pomx, pomy) in self.adjacentTiles:
                 dx, dy = 0, 0
                 self.successfulMate(closest_pom)
                 closest_pom.gotMated()
@@ -135,9 +136,7 @@ class PomPom(object):
         print("successful mate!")
         self.energy -= 20  # Reduce energy
         self.cooldown = 10
-        evolution = Evolution(self, mate, self.grid)
-        evoGrid = evolution.spawnBabies()
-        self.grid = evoGrid #update the grid
+        self.spawnBabies(mate)
 
 
     def gotMated(self):
@@ -340,6 +339,33 @@ class PomPom(object):
         when the pom encounters food, increase it's energy
         """
         self.energy = self.energy + 10 #change value?
+
+
+    def spawnBabies(self, mate):
+        num = random.randint(1, 3)  # Number of babies
+        available_spots = [pos for pos in self.adjacentTiles if pos is not None]
+        #available_spots = [pos for pos in spawnPoints if self.isValid(pos)]
+        random.shuffle(available_spots)  # Shuffle to randomize placement
+        for i in range(min(num, len(available_spots))):  # Only place babies in valid spots
+            x, y = available_spots[i]
+            baby = self.createPom(mate, x, y)  #Assign position
+            self.grid[baby.rect.x][baby.rect.y] = baby  #Place in grid
+
+
+    def isValid(self, pos):
+        """Check if the position is within bounds and empty."""
+        x, y = pos
+        return 0 <= x < len(self.grid) and 0 <= y < len(self.grid[0]) and self.grid[x][y] is None
+
+
+    def createPom(self, mate, x, y):
+        """
+        Will look at the two parents and make a new pom
+        with randomized genes from them.
+        """
+        baby = PomPom(x, y, self.grid)  # Create a new instance
+        return baby
+
 
     
 

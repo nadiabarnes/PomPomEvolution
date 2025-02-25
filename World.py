@@ -51,6 +51,7 @@ class PomPomWorld:
 
 
     def updatePomPoms(self):
+        #TODO dead pompoms are still on the grid, just not being drawn
         new_grid = [[None for _ in range(self.height)] for _ in range(self.width)]
         for pompom in self.pompoms:
             pompom.update(self.grid)
@@ -58,15 +59,16 @@ class PomPomWorld:
                 continue
             # Place PomPom in new grid
             new_grid[pompom.rect.x][pompom.rect.y] = pompom
-        self.grid = new_grid # Update the grid with the new positions
-        #necessary for adding baby poms to the lists
-        for x in range(self.width):
-            for y in range(self.height):
-                if self.grid[x][y]: #if there is a pompom in this spot
-                    pom = self.grid[x][y]
-                    if isinstance(pom, PomPom) and pom not in self.pompoms:
-                        self.pompoms.append(pom)
 
+            #necessary for adding baby poms to the lists
+            for x in range(self.width):
+                for y in range(self.height):
+                    if pompom.grid[x][y]: #if there is a pompom in this spot
+                        pom = self.grid[x][y]
+                        if isinstance(pom, PomPom) and pom not in self.pompoms:
+                            self.pompoms.append(pom)
+
+        self.grid = new_grid # Update the grid with the new positions
 
 #-------------------------------------------------------------------------------
 
@@ -101,6 +103,8 @@ class PomPomWorld:
             for y in range(self.height):
                 if self.grid[x][y]: #if there is a pompom in this spot
                     pompom = self.grid[x][y]
+                    if pompom.energy <= 0:
+                        return
                     if pompom.mateReady == True:
                         pygame.draw.rect(
                             screen,
@@ -125,6 +129,8 @@ class PomPomWorld:
             for y in range(self.height):
                 if self.grid[x][y]: #if there is a pompom in this spot
                     pompom = self.grid[x][y]
+                    if pompom.energy <= 0:
+                        return
                     pygame.draw.rect(
                         screen,
                         (212, 30, 60),  # Green for living PomPoms
@@ -144,6 +150,8 @@ class PomPomWorld:
             for y in range(self.height):
                 if self.grid[x][y] and isinstance(self.grid[x][y], PomPom):  # Ensure it's a PomPom
                     pompom = self.grid[x][y]
+                    if pompom.energy <= 0:
+                        return
                     pygame.draw.rect(
                         screen,
                         (255, 255, 255),

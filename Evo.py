@@ -21,10 +21,12 @@ class Evolution():
             self.grid[baby.rect.x][baby.rect.y] = baby  # Place in grid
         return self.grid
 
+
     def isValid(self, pos):
         """Check if the position is within bounds and empty."""
         x, y = pos
         return 0 <= x < len(self.grid) and 0 <= y < len(self.grid[0]) and self.grid[x][y] is None
+
 
     def createPom(self):
         """
