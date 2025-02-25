@@ -58,7 +58,7 @@ class PomPomWorld:
         for pompom in self.pompoms:
             pompom.update(self.grid)  # Update PomPom behavior
 
-            if pompom.energy == 0:  # If it dies, don't add to the new grid
+            if pompom.energy <= 0:  # If it dies, don't add to the new grid
                 continue  # Skip dead PomPom
 
             # Place the alive PomPom in the new grid
@@ -95,8 +95,33 @@ class PomPomWorld:
         #self.drawVisableTiles(screen)
         self.drawBushes(screen)
         self.drawPomPomsMating(screen,font,text_color)
+        self.drawLivingPomPomCount(screen, font)
         
         pygame.display.flip() #update the screen
+    
+
+    def drawLivingPomPomCount(self, screen, font):
+        """
+        Draws the number of living PomPoms in the top-left corner of the screen.
+        """
+        # Count the number of living PomPoms
+        living_pompoms = len([pompom for pompom in self.pompoms if pompom.energy > 0])
+
+        # Create the text to display the count
+        count_text = font.render(f"Living PomPoms: {living_pompoms}", True, (255, 255, 255))
+
+        # Define the position and size for the box
+        box_width = count_text.get_width() + 10  # Add padding
+        box_height = count_text.get_height() + 10
+        box_rect = pygame.Rect(10, 10, box_width, box_height)  # Box position at (10, 10) in the corner
+
+        # Draw the box (background)
+        pygame.draw.rect(screen, (0, 0, 0), box_rect)  # Black background for the box
+        pygame.draw.rect(screen, (255, 255, 255), box_rect, 2)  # White border for the box
+
+        # Draw the text inside the box
+        screen.blit(count_text, (box_rect.x + 5, box_rect.y + 5))  # Position the text inside the box
+
 
 
     def drawBushes(self, screen):
@@ -114,8 +139,6 @@ class PomPomWorld:
             for y in range(self.height):
                 if self.grid[x][y]: #if there is a pompom in this spot
                     pompom = self.grid[x][y]
-                    if pompom.energy <= 0:
-                        return
                     if pompom.mateReady == True:
                         pygame.draw.rect(
                             screen,
@@ -140,8 +163,6 @@ class PomPomWorld:
             for y in range(self.height):
                 if self.grid[x][y]: #if there is a pompom in this spot
                     pompom = self.grid[x][y]
-                    if pompom.energy <= 0:
-                        return
                     pygame.draw.rect(
                         screen,
                         (212, 30, 60),  # Green for living PomPoms
