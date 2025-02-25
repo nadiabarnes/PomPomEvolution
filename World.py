@@ -94,7 +94,7 @@ class PomPomWorld:
 
         #self.drawVisableTiles(screen)
         self.drawBushes(screen)
-        self.drawPomPomsMating(screen,font,text_color)
+        self.drawPomPomsFoodtype(screen,font,text_color)
         self.drawLivingPomPomCount(screen, font)
         
         pygame.display.flip() #update the screen
@@ -158,6 +158,38 @@ class PomPomWorld:
                     ))
                     screen.blit(energy_text, text_rect)
     
+
+    def drawPomPomsFoodtype(self, screen, font, text_color):
+        for x in range(self.width):
+            for y in range(self.height):
+                if self.grid[x][y]: #if there is a pompom in this spot
+                    pompom = self.grid[x][y]
+                    if pompom.foodType == "herbavore":
+                        pygame.draw.rect(
+                            screen,
+                            (66, 144, 88),  #Green for Herbavore
+                            (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
+                        )
+                    elif pompom.foodType == "omnivore":
+                        pygame.draw.rect(
+                            screen,
+                            (255, 184, 74),  #Yellow for omivore
+                            (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
+                        )
+                    elif pompom.foodType == "carnivore":
+                        pygame.draw.rect(
+                            screen,
+                            (212, 30, 60),  #Red for carnivore
+                            (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
+                        )
+                    energy_text = font.render(str(pompom.energy), True, text_color)
+                    text_rect = energy_text.get_rect(center=(
+                        x * self.cell_size + self.cell_size // 2,
+                        y * self.cell_size + self.cell_size // 2
+                    ))
+                    screen.blit(energy_text, text_rect)
+
+
     def drawPomPoms(self, screen, font, text_color):
         for x in range(self.width):
             for y in range(self.height):

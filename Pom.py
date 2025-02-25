@@ -3,7 +3,6 @@ import pygame
 import numpy
 import math
 from Food import Bush
-from Evo import Evolution
 
 class PomPom(object):
     """
@@ -26,7 +25,7 @@ class PomPom(object):
         movePatterns = ["random","roomba"]
         self.movePattern = random.choice(movePatterns)
         #What the pom considers food
-        foodTypes = ["herbavore","carnivore","omnivore"]
+        foodTypes = ["herbavore","carnivore"] #removed omnivore temp
         self.foodType = random.choice(foodTypes)
         #the pom's mating availability
         self.mateReady = False
@@ -56,7 +55,7 @@ class PomPom(object):
             return self.grid  # don't do anyhthing if dead
         
         self.findMate(len(self.grid), len(self.grid)) 
-        self.seekBushes(len(self.grid), len(self.grid))
+        self.findFood(len(self.grid), len(self.grid))
         self.updateAdjacentTiles(len(self.grid), len(self.grid))
         self.vision(5)
         self.visionTilesUpdate(5)
@@ -79,124 +78,6 @@ class PomPom(object):
             if 0 <= new_x < width and 0 <= new_y < height:  # Ensure within bounds
                 self.adjacentTiles.append((new_x, new_y))
 
-    
-    def findMate(self, width, height):
-        """
-        If the PomPom has enough energy, try to reproduce
-        """
-        if not self.mateReady:
-            return
-
-        closest_pom = None
-        min_distance = float('inf')
-        dx, dy = 0, 0  # Default movement direction (no movement)
-
-        # Check all PomPoms in the visible area
-        for tile in self.visableTiles:
-            x, y = tile #coords of current tile
-            if self.grid[x][y] and isinstance(self.grid[x][y], PomPom): #if pompom visable
-                pom = self.grid[x][y] #save the pom
-                if pom is not self and self.grid[x][y].rect.colliderect(self.vis) and pom.mateReady: #maybe remove grid collision?
-                    distance = abs(self.rect.centerx - pom.rect.centerx) + abs(self.rect.centery - pom.rect.centery)
-                    if distance < min_distance:
-                        min_distance = distance
-                        closest_pom = pom
-
-        if closest_pom:
-            pomx, pomy = closest_pom.rect.x, closest_pom.rect.y  # Closest mate's coordinates
-
-            # If the mate is adjacent, stay still, mate, and enter cooldown
-            if (pomx, pomy) in self.adjacentTiles:
-                dx, dy = 0, 0
-                self.successfulMate(closest_pom)
-                closest_pom.gotMated()
-                return  # Exit function after mating
-
-            # Move towards the mate if not adjacent
-            x_dist = self.rect.x - pomx
-            y_dist = self.rect.y - pomy
-
-            if abs(x_dist) > abs(y_dist):  # Prioritize horizontal movement
-                dx = -numpy.sign(x_dist)
-            else:  # Otherwise, move vertically
-                dy = -numpy.sign(y_dist)
-
-            # Move the PomPom
-            new_rect = self.rect.move(dx, dy)
-            if 0 <= new_rect.x < width and 0 <= new_rect.y < height:
-                self.updateFacing(self.rect.x, self.rect.y, new_rect.x, new_rect.y)
-                self.rect = new_rect
-            else:
-                self.genericMove(width, height)  # If pathfinding leads outside, move randomly
-        else:
-            self.genericMove(width, height)  # If no mate is found, move randomly
-    
-
-    def successfulMate(self, mate):
-        print("successful mate!")
-        self.energy -= 20  # Reduce energy
-        self.cooldown = 10
-        self.spawnBabies(mate)
-
-
-    def gotMated(self):
-        """
-        when a different pompom mates with you, you still loose then energy and cooldown
-        """
-        self.energy -= 20  # Reduce energy
-        self.cooldown = 10  # 10-round cooldown
-
-    
-    def seekBushes(self, width, height):
-        """
-        herbavore pompoms move towards bushes
-        If bush isn't in sight, then do generic move
-        """
-        if self.mateReady == True:
-            return
-        closest_bush = None
-        min_distance = float('inf')
-        dx, dy = 0, 0  # Default movement direction (no movement)
-
-        # Check all bushes to see if they are within the PomPom's visible tiles
-        for tile in self.visableTiles:
-            x, y = tile #coords of current tile
-            if self.grid[x][y] and isinstance(self.grid[x][y], Bush): #if bush visable
-                bush = self.grid[x][y] #save the bush
-                if bush.cooldown == 0: #maybe remove grid collision?
-                    distance = abs(self.rect.centerx - bush.rect.centerx) + abs(self.rect.centery - bush.rect.centery)
-                    if distance < min_distance:
-                        min_distance = distance
-                        closest_bush = bush
-
-        if closest_bush:
-            if self.rect.x == closest_bush.rect.x and self.rect.y == closest_bush.rect.y and closest_bush.cooldown == 0:
-                #if on top of closest bush, eat it
-                self.eat()  # Gain energy from eating
-                closest_bush.eaten()
-                return
-            else:
-                #otherwise, move towards bush
-                bushx, bushy = closest_bush.rect.x, closest_bush.rect.y #cloesest bush coords
-                #xory is positive if the bush is closer on the x axis, negative for y
-                x_dist = self.rect.x - bushx
-                y_dist = self.rect.y - bushy
-
-                if abs(x_dist) > abs(y_dist):  # Prioritize horizontal movement
-                    dx = -numpy.sign(x_dist)
-                else:  # Otherwise, move vertically
-                    dy = -numpy.sign(y_dist)
-
-                # Move the PomPom
-                new_rect = self.rect.move(dx, dy)
-                if 0 <= new_rect.x < width and 0 <= new_rect.y < height:
-                    self.updateFacing(self.rect.x, self.rect.y, new_rect.x, new_rect.y)
-                    self.rect = new_rect
-                else:
-                    self.genericMove(width, height)  # If pathfinding leads outside, move randomly
-        else:
-            self.genericMove(width, height)  # If no bush found, move randomly
-    
 
     def vision(self, size):
         """
@@ -264,6 +145,21 @@ class PomPom(object):
         self.visableTiles = visibleTiles
 
 
+    def updateFacing(self, oldx, oldy, newx, newy):
+        """
+        Import original and updated coordinates, updates the pompom's facing variable
+        """
+        dx = oldx-newx
+        dy = oldy - newy
+        if dx > 0:
+            self.facing = 'E'
+        elif dx < 0:
+            self.facing = 'W'
+        elif dy > 0:
+            self.facing = 'N'
+        elif dy < 0:
+            self.facing = 'S'
+
 
     def genericMove(self, width, height):
         """
@@ -297,7 +193,6 @@ class PomPom(object):
             self.randomMove(width, height)
     
 
-
     def moveForward(self, width, height):
         """
         Roomba Style Movement. move in direction pom is facing,
@@ -317,28 +212,141 @@ class PomPom(object):
             self.randomMove(width, height)
     
 
+    def findFood(self, width, height):
+        if self.foodType == "herbavore":
+            self.seekBushes(width, height)
+        elif self.foodType == "omnivore":
+            self.seekBushes(width, height)
+        elif self.foodType == "carnivore":
+            self.seekPomPoms(width, height)
+    
 
-    def updateFacing(self, oldx, oldy, newx, newy):
-        """
-        Import original and updated coordinates, updates the pompom's facing variable
-        """
-        dx = oldx-newx
-        dy = oldy - newy
-        if dx > 0:
-            self.facing = 'E'
-        elif dx < 0:
-            self.facing = 'W'
-        elif dy > 0:
-            self.facing = 'N'
-        elif dy < 0:
-            self.facing = 'S'
+    def seekPomPoms(self, width, height):
+        pass
 
+
+    def seekBushes(self, width, height):
+        """
+        herbavore pompoms move towards bushes
+        If bush isn't in sight, then do generic move
+        """
+        if self.mateReady == True:
+            return
+        closest_bush = None
+        min_distance = float('inf')
+        dx, dy = 0, 0  # Default movement direction (no movement)
+
+        # Check all bushes to see if they are within the PomPom's visible tiles
+        for tile in self.visableTiles:
+            x, y = tile #coords of current tile
+            if self.grid[x][y] and isinstance(self.grid[x][y], Bush): #if bush visable
+                bush = self.grid[x][y] #save the bush
+                if bush.cooldown == 0: #maybe remove grid collision?
+                    distance = abs(self.rect.centerx - bush.rect.centerx) + abs(self.rect.centery - bush.rect.centery)
+                    if distance < min_distance:
+                        min_distance = distance
+                        closest_bush = bush
+
+        if closest_bush:
+            if self.rect.x == closest_bush.rect.x and self.rect.y == closest_bush.rect.y and closest_bush.cooldown == 0:
+                #if on top of closest bush, eat it
+                self.eat()  # Gain energy from eating
+                closest_bush.eaten()
+                return
+            else:
+                #otherwise, move towards bush
+                bushx, bushy = closest_bush.rect.x, closest_bush.rect.y #cloesest bush coords
+                #xory is positive if the bush is closer on the x axis, negative for y
+                x_dist = self.rect.x - bushx
+                y_dist = self.rect.y - bushy
+
+                if abs(x_dist) > abs(y_dist):  # Prioritize horizontal movement
+                    dx = -numpy.sign(x_dist)
+                else:  # Otherwise, move vertically
+                    dy = -numpy.sign(y_dist)
+
+                # Move the PomPom
+                new_rect = self.rect.move(dx, dy)
+                if 0 <= new_rect.x < width and 0 <= new_rect.y < height:
+                    self.updateFacing(self.rect.x, self.rect.y, new_rect.x, new_rect.y)
+                    self.rect = new_rect
+                else:
+                    self.genericMove(width, height)  # If pathfinding leads outside, move randomly
+        else:
+            self.genericMove(width, height)  # If no bush found, move randomly
+    
 
     def eat(self):
         """
         when the pom encounters food, increase it's energy
         """
         self.energy = self.energy + 10 #change value?
+
+
+    def findMate(self, width, height):
+        """
+        If the PomPom has enough energy, try to reproduce
+        """
+        if not self.mateReady:
+            return
+
+        closest_pom = None
+        min_distance = float('inf')
+        dx, dy = 0, 0  # Default movement direction (no movement)
+
+        # Check all PomPoms in the visible area
+        for tile in self.visableTiles:
+            x, y = tile #coords of current tile
+            if self.grid[x][y] and isinstance(self.grid[x][y], PomPom): #if pompom visable
+                pom = self.grid[x][y] #save the pom
+                if pom is not self and self.grid[x][y].rect.colliderect(self.vis) and pom.mateReady: #maybe remove grid collision?
+                    distance = abs(self.rect.centerx - pom.rect.centerx) + abs(self.rect.centery - pom.rect.centery)
+                    if distance < min_distance:
+                        min_distance = distance
+                        closest_pom = pom
+
+        if closest_pom:
+            pomx, pomy = closest_pom.rect.x, closest_pom.rect.y  # Closest mate's coordinates
+
+            # If the mate is adjacent, stay still, mate, and enter cooldown
+            if (pomx, pomy) in self.adjacentTiles:
+                dx, dy = 0, 0
+                self.successfulMate(closest_pom)
+                closest_pom.gotMated()
+                return  # Exit function after mating
+
+            # Move towards the mate if not adjacent
+            x_dist = self.rect.x - pomx
+            y_dist = self.rect.y - pomy
+
+            if abs(x_dist) > abs(y_dist):  # Prioritize horizontal movement
+                dx = -numpy.sign(x_dist)
+            else:  # Otherwise, move vertically
+                dy = -numpy.sign(y_dist)
+
+            # Move the PomPom
+            new_rect = self.rect.move(dx, dy)
+            if 0 <= new_rect.x < width and 0 <= new_rect.y < height:
+                self.updateFacing(self.rect.x, self.rect.y, new_rect.x, new_rect.y)
+                self.rect = new_rect
+            else:
+                self.genericMove(width, height)  # If pathfinding leads outside, move randomly
+        else:
+            self.genericMove(width, height)  # If no mate is found, move randomly
+    
+
+    def successfulMate(self, mate):
+        self.energy -= 20  # Reduce energy
+        self.cooldown = 10
+        self.spawnBabies(mate)
+
+
+    def gotMated(self):
+        """
+        when a different pompom mates with you, you still loose then energy and cooldown
+        """
+        self.energy -= 20  # Reduce energy
+        self.cooldown = 10  # 10-round cooldown
 
 
     def spawnBabies(self, mate):
