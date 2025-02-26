@@ -47,13 +47,10 @@ class PomPom(object):
         self.grid = grid #match pom's grid to current grid
         self.energy -= 1  # Loses energy each turn
         self.cooldown -= 1
-        if self.energy > 50:
-            self.mateReady = True
-        if self.energy < 30 or self.cooldown > 0:
-            self.mateReady = False
         if self.energy <= 0:
             return self.grid  # don't do anyhthing if dead
         
+        self.isMateReady()
         self.findMate(len(self.grid), len(self.grid)) 
         self.findFood(len(self.grid), len(self.grid))
         self.updateAdjacentTiles(len(self.grid), len(self.grid))
@@ -222,7 +219,53 @@ class PomPom(object):
     
 
     def seekPomPoms(self, width, height):
-        pass
+        if self.mateReady == True:
+            return
+
+        closest_pom = None
+        min_distance = float('inf')
+        dx, dy = 0, 0  # Default movement direction (no movement)
+
+        # Check all PomPoms in the visible area
+        for tile in self.visableTiles:
+            x, y = tile #coords of current tile
+            if self.grid[x][y] and isinstance(self.grid[x][y], PomPom): #if pompom visable
+                pom = self.grid[x][y] #save the pom
+                if pom is not self and self.grid[x][y].rect.colliderect(self.vis): #maybe remove grid collision?
+                    distance = abs(self.rect.centerx - pom.rect.centerx) + abs(self.rect.centery - pom.rect.centery)
+                    if distance < min_distance:
+                        min_distance = distance
+                        closest_pom = pom
+
+        if closest_pom:
+            pomx, pomy = closest_pom.rect.x, closest_pom.rect.y  # Closest poms's coordinates
+
+            # If the pom is adjacent, stay still, pom, and enter cooldown
+            if (pomx, pomy) in self.adjacentTiles:
+                dx, dy = 0, 0
+                closest_pom.takeDamage()
+                if closest_pom.energy <= 0:
+                    self.eat()
+                return  # Exit function after mating
+
+            # Move towards the pom if not adjacent
+            x_dist = self.rect.x - pomx
+            y_dist = self.rect.y - pomy
+
+            if abs(x_dist) > abs(y_dist):  # Prioritize horizontal movement
+                dx = -numpy.sign(x_dist)
+            else:  # Otherwise, move vertically
+                dy = -numpy.sign(y_dist)
+
+            # Move the PomPom
+            new_rect = self.rect.move(dx, dy)
+            if 0 <= new_rect.x < width and 0 <= new_rect.y < height:
+                self.updateFacing(self.rect.x, self.rect.y, new_rect.x, new_rect.y)
+                self.rect = new_rect
+            else:
+                self.genericMove(width, height)  # If pathfinding leads outside, move randomly
+        else:
+            self.genericMove(width, height)  # If no pom is found, move randomly
 
 
     def seekBushes(self, width, height):
@@ -280,7 +323,27 @@ class PomPom(object):
         """
         when the pom encounters food, increase it's energy
         """
-        self.energy = self.energy + 10 #change value?
+        if self.foodType == "herbavore":
+            self.energy = self.energy + 10 #change value?
+        if self.foodType == "carnivore":
+            self.energy = self.energy + 50
+    
+    
+    def takeDamage(self):
+        self.energy = self.energy - 30
+
+
+    def isMateReady(self):
+        if self.foodType == "herbavore":
+            if self.energy > 50:
+                self.mateReady = True
+            if self.energy < 30 or self.cooldown > 0:
+                self.mateReady = False
+        elif self.foodType == "carnavore":
+            if self.energy > 120:
+                self.mateReady = True
+            if self.energy < 70 or self.cooldown > 0:
+                self.mateReady = False
 
 
     def findMate(self, width, height):
