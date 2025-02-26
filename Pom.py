@@ -13,7 +13,7 @@ class PomPom(object):
         #import the world grid
         self.grid = grid
         #energy increases when food is eaten, decreases by 1 each turn
-        self.energy = 10
+        self.energy = 20
         #What tiles the pom can see, changes direction as it moves
         directions = ['N','E','S','W']
         self.facing = random.choice(directions)
@@ -25,10 +25,14 @@ class PomPom(object):
         if movePattern == None:
             movePatterns = ["random","roomba"]
             self.movePattern = random.choice(movePatterns)
+        else:
+            self.movePattern = movePattern
         #What the pom considers food
         if foodType == None:
             foodTypes = ["herbavore","carnivore"] #removed omnivore temp
             self.foodType = random.choice(foodTypes)
+        else:
+            self.foodType = foodType
         #the pom's mating availability
         self.mateReady = False
         self.cooldown = 0
@@ -234,10 +238,11 @@ class PomPom(object):
             if self.grid[x][y] and isinstance(self.grid[x][y], PomPom): #if pompom visable
                 pom = self.grid[x][y] #save the pom
                 if pom is not self and self.grid[x][y].rect.colliderect(self.vis): #maybe remove grid collision?
-                    distance = abs(self.rect.centerx - pom.rect.centerx) + abs(self.rect.centery - pom.rect.centery)
-                    if distance < min_distance:
-                        min_distance = distance
-                        closest_pom = pom
+                    if pom.foodType != "carnivore":
+                        distance = abs(self.rect.centerx - pom.rect.centerx) + abs(self.rect.centery - pom.rect.centery)
+                        if distance < min_distance:
+                            min_distance = distance
+                            closest_pom = pom
 
         if closest_pom:
             pomx, pomy = closest_pom.rect.x, closest_pom.rect.y  # Closest poms's coordinates
@@ -328,7 +333,7 @@ class PomPom(object):
         if self.foodType == "herbavore":
             self.energy = self.energy + 10 #change value?
         if self.foodType == "carnivore":
-            self.energy = self.energy + 50
+            self.energy = self.energy + 100
     
     
     def takeDamage(self):
@@ -364,11 +369,12 @@ class PomPom(object):
             x, y = tile #coords of current tile
             if self.grid[x][y] and isinstance(self.grid[x][y], PomPom): #if pompom visable
                 pom = self.grid[x][y] #save the pom
-                if pom is not self and self.grid[x][y].rect.colliderect(self.vis) and pom.mateReady: #maybe remove grid collision?
-                    distance = abs(self.rect.centerx - pom.rect.centerx) + abs(self.rect.centery - pom.rect.centery)
-                    if distance < min_distance:
-                        min_distance = distance
-                        closest_pom = pom
+                if pom is not self and self.grid[x][y].rect.colliderect(self.vis): #maybe remove grid collision?
+                    if pom.mateReady and (pom.foodType == self.foodType):
+                        distance = abs(self.rect.centerx - pom.rect.centerx) + abs(self.rect.centery - pom.rect.centery)
+                        if distance < min_distance:
+                            min_distance = distance
+                            closest_pom = pom
 
         if closest_pom:
             pomx, pomy = closest_pom.rect.x, closest_pom.rect.y  # Closest mate's coordinates
@@ -436,18 +442,10 @@ class PomPom(object):
         Will look at the two parents and make a new pom
         with randomized genes from them.
         """
-        value = random.randint(0, 1)
-        if value == 0:
-            food = self.foodType
-        else:
-            food = mate.foodType
-        value = random.randint(0, 1)
-        if value == 0:
-            pattern = self.movePattern
-        else:
-            pattern = mate.movePattern
-        baby = PomPom(x, y, self.grid, pattern, food)  # Create a new instance
-        return baby
+        food = random.choice([self.foodType, mate.foodType])
+        pattern = random.choice([self.movePattern, mate.movePattern])
+    
+        return PomPom(x, y, self.grid, pattern, food)
 
 
     

@@ -9,26 +9,33 @@ class PomPomWorld:
     """
     This will handle the board/world for PomPomEvolution
     """
-    def __init__(self, width=20, height=20, cell_size=20, pomNumber = 2, bushNumber = 20):
+    def __init__(self, width=20, height=20, cell_size=20, pomNumber=2, bushNumber=20, percentCarnivore=.2):
         """
-        board variables
+        Board variables
         """
-        self.width = width #grid width
-        self.height = height #grid height
-        self.cell_size = cell_size #pop up window size
-        self.grid = [[None for _ in range(height)] for _ in range(width)] #creates an empty grid
+        self.width = width  # Grid width
+        self.height = height  # Grid height
+        self.cell_size = cell_size  # Pop-up window size
+        self.grid = [[None for _ in range(height)] for _ in range(width)]  # Creates an empty grid
         self.bushes = []
-        self.pompoms = []
+        self.pompoms = [] 
 
-        #spawn in pompoms
-        for _ in range(pomNumber):  #rough num of starting pompoms
+        # Define probabilities for food types
+        foodTypeWeights = {"herbavore": 1 - percentCarnivore, "carnivore": percentCarnivore}
+
+        # Spawn in PomPoms
+        for _ in range(pomNumber):  # Rough number of starting PomPoms
             x, y = random.randint(0, width - 1), random.randint(0, height - 1)
             if not self.grid[x][y]:
-                self.grid[x][y] = PomPom(x, y, self.grid)
+                food = random.choices(list(foodTypeWeights.keys()), weights=foodTypeWeights.values())[0]
+                pattern = random.choice(["random", "roomba"])
+                newPom = PomPom(x, y, self.grid, pattern, food)
+
+                self.grid[x][y] = newPom
                 self.pompoms.append(self.grid[x][y])
 
-        #spawn in bushes
-        for _ in range(bushNumber):  #rough Starting num bushes
+        # Spawn in bushes
+        for _ in range(bushNumber):  # Rough starting number of bushes
             x, y = random.randint(0, width - 1), random.randint(0, height - 1)
             if not self.grid[x][y]:
                 self.grid[x][y] = Bush(x, y, self.grid)
