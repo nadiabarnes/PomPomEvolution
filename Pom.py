@@ -38,11 +38,28 @@ class PomPom(object):
         self.cooldown = 40
         #tiles surrounding the pom
         self.adjacentTiles = [None for _ in range(9)]
-
+        self.foodTypeSpecificSetup()
         #initiate vision and adjacency
+        self.foodTypeVision(3, 7)
         self.updateAdjacentTiles(len(self.grid), len(self.grid))
-        self.vision(3)
-        self.visionTilesUpdate(3)
+    
+
+    def foodTypeSpecificSetup(self):
+        if self.foodType == "herb":
+            self.energy = 10
+            self.cooldown = 40
+        if self.foodType == "carn":
+            self.energy = 100
+            self.cooldown = 200
+    
+
+    def foodTypeVision(self, herbSize, carnSize):
+        if self.foodType == "herb":
+            self.vision(herbSize)
+            self.visionTilesUpdate(herbSize)
+        if self.foodType == "carn":
+            self.vision(carnSize)
+            self.visionTilesUpdate(carnSize)
         
 
     def update(self, grid):
@@ -59,8 +76,7 @@ class PomPom(object):
         self.findMate(len(self.grid), len(self.grid)) 
         self.findFood(len(self.grid), len(self.grid))
         self.updateAdjacentTiles(len(self.grid), len(self.grid))
-        self.vision(5) #can change 5 to any odd num to change vision size
-        self.visionTilesUpdate(5)
+        self.foodTypeVision(3, 7)
 
         return self.grid
     
@@ -226,7 +242,9 @@ class PomPom(object):
     def seekPomPoms(self, width, height):
         if self.mateReady == True:
             return
-
+        if self.energy > 300:
+            self.genericMove(width, height)
+            return
         closest_pom = None
         min_distance = float('inf')
         dx, dy = 0, 0  # Default movement direction (no movement)
@@ -237,8 +255,9 @@ class PomPom(object):
             if self.grid[x][y] and isinstance(self.grid[x][y], PomPom): #if pompom visable
                 pom = self.grid[x][y] #save the pom
                 if pom is not self and self.grid[x][y].rect.colliderect(self.vis): #maybe remove grid collision?
-                    if pom.foodType != "carn":
                         distance = abs(self.rect.centerx - pom.rect.centerx) + abs(self.rect.centery - pom.rect.centery)
+                        if pom.foodType == "carn":
+                            distance = distance + 10 #will only hunt carns if herbs not available
                         if distance < min_distance:
                             min_distance = distance
                             closest_pom = pom
@@ -280,9 +299,6 @@ class PomPom(object):
         If bush isn't in sight, then do generic move
         """
         if self.mateReady == True:
-            return
-        if self.energy > 120:
-            self.genericMove
             return
         closest_bush = None
         min_distance = float('inf')
@@ -413,7 +429,7 @@ class PomPom(object):
             self.energy -= 20  # Reduce energy
             self.cooldown = 10
         if self.foodType == "carn":
-            self.energy -= 50
+            self.energy -= 20
             self.cooldown = 40
         self.spawnBabies(mate)
 

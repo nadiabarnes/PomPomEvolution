@@ -137,7 +137,7 @@ class PomPomWorld:
             if bush.cooldown == 0:  # Only draw if active
                 pygame.draw.rect(
                     screen,
-                    (65, 255, 110),  # Green for active bushes
+                    (66, 144, 88),  # Green for active bushes
                     (bush.rect.x * self.cell_size, bush.rect.y * self.cell_size, self.cell_size, self.cell_size)
                 )
 
@@ -175,7 +175,7 @@ class PomPomWorld:
                     if pompom.foodType == "herb":
                         pygame.draw.rect(
                             screen,
-                            (66, 144, 88),  #Green for herb
+                            (65, 255, 110),  #Green for herb
                             (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
                         )
                     elif pompom.foodType == "omnivore":
