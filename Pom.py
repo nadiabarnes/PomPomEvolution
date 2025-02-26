@@ -9,7 +9,7 @@ class PomPom(object):
     This will track an individual pompom and it's behavior
     """
 
-    def __init__(self, x, y, grid):
+    def __init__(self, x, y, grid, movePattern=None, foodType=None):
         #import the world grid
         self.grid = grid
         #energy increases when food is eaten, decreases by 1 each turn
@@ -21,12 +21,14 @@ class PomPom(object):
         self.visableTiles = []
         #the pom's tile
         self.rect = pygame.Rect(x, y, 1, 1)
-        #What the pom's generic move pattern is
-        movePatterns = ["random","roomba"]
-        self.movePattern = random.choice(movePatterns)
+        #set the pom's generic move pattern
+        if movePattern == None:
+            movePatterns = ["random","roomba"]
+            self.movePattern = random.choice(movePatterns)
         #What the pom considers food
-        foodTypes = ["herbavore","carnivore"] #removed omnivore temp
-        self.foodType = random.choice(foodTypes)
+        if foodType == None:
+            foodTypes = ["herbavore","carnivore"] #removed omnivore temp
+            self.foodType = random.choice(foodTypes)
         #the pom's mating availability
         self.mateReady = False
         self.cooldown = 0
@@ -434,7 +436,17 @@ class PomPom(object):
         Will look at the two parents and make a new pom
         with randomized genes from them.
         """
-        baby = PomPom(x, y, self.grid)  # Create a new instance
+        value = random.randint(0, 1)
+        if value == 0:
+            food = self.foodType
+        else:
+            food = mate.foodType
+        value = random.randint(0, 1)
+        if value == 0:
+            pattern = self.movePattern
+        else:
+            pattern = mate.movePattern
+        baby = PomPom(x, y, self.grid, pattern, food)  # Create a new instance
         return baby
 
 
