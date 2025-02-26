@@ -9,7 +9,7 @@ class PomPomWorld:
     """
     This will handle the board/world for PomPomEvolution
     """
-    def __init__(self, width=20, height=20, cell_size=20, pomNumber=2, bushNumber=20, percentCarnivore=.2):
+    def __init__(self, width=20, height=20, cell_size=20, pomNumber=2, bushNumber=20, percentcarn=.2):
         """
         Board variables
         """
@@ -21,7 +21,7 @@ class PomPomWorld:
         self.pompoms = [] 
 
         # Define probabilities for food types
-        foodTypeWeights = {"herbavore": 1 - percentCarnivore, "carnivore": percentCarnivore}
+        foodTypeWeights = {"herb": 1 - percentcarn, "carn": percentcarn}
 
         # Spawn in PomPoms
         for _ in range(pomNumber):  # Rough number of starting PomPoms
@@ -171,10 +171,10 @@ class PomPomWorld:
             for y in range(self.height):
                 if self.grid[x][y]: #if there is a pompom in this spot
                     pompom = self.grid[x][y]
-                    if pompom.foodType == "herbavore":
+                    if pompom.foodType == "herb":
                         pygame.draw.rect(
                             screen,
-                            (66, 144, 88),  #Green for Herbavore
+                            (66, 144, 88),  #Green for herb
                             (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
                         )
                     elif pompom.foodType == "omnivore":
@@ -183,10 +183,10 @@ class PomPomWorld:
                             (255, 184, 74),  #Yellow for omivore
                             (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
                         )
-                    elif pompom.foodType == "carnivore":
+                    elif pompom.foodType == "carn":
                         pygame.draw.rect(
                             screen,
-                            (212, 30, 60),  #Red for carnivore
+                            (212, 30, 60),  #Red for carn
                             (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
                         )
                     energy_text = font.render(str(pompom.energy), True, text_color)

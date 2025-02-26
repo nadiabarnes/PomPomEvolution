@@ -29,20 +29,20 @@ class PomPom(object):
             self.movePattern = movePattern
         #What the pom considers food
         if foodType == None:
-            foodTypes = ["herbavore","carnivore"] #removed omnivore temp
+            foodTypes = ["herb","carn"] #removed omnivore temp
             self.foodType = random.choice(foodTypes)
         else:
             self.foodType = foodType
         #the pom's mating availability
         self.mateReady = False
-        self.cooldown = 0
+        self.cooldown = 40
         #tiles surrounding the pom
         self.adjacentTiles = [None for _ in range(9)]
 
         #initiate vision and adjacency
         self.updateAdjacentTiles(len(self.grid), len(self.grid))
-        self.vision(5)
-        self.visionTilesUpdate(5)
+        self.vision(3)
+        self.visionTilesUpdate(3)
         
 
     def update(self, grid):
@@ -216,11 +216,11 @@ class PomPom(object):
     
 
     def findFood(self, width, height):
-        if self.foodType == "herbavore":
+        if self.foodType == "herb":
             self.seekBushes(width, height)
         elif self.foodType == "omnivore":
             self.seekBushes(width, height)
-        elif self.foodType == "carnivore":
+        elif self.foodType == "carn":
             self.seekPomPoms(width, height)
     
 
@@ -238,7 +238,7 @@ class PomPom(object):
             if self.grid[x][y] and isinstance(self.grid[x][y], PomPom): #if pompom visable
                 pom = self.grid[x][y] #save the pom
                 if pom is not self and self.grid[x][y].rect.colliderect(self.vis): #maybe remove grid collision?
-                    if pom.foodType != "carnivore":
+                    if pom.foodType != "carn":
                         distance = abs(self.rect.centerx - pom.rect.centerx) + abs(self.rect.centery - pom.rect.centery)
                         if distance < min_distance:
                             min_distance = distance
@@ -277,7 +277,7 @@ class PomPom(object):
 
     def seekBushes(self, width, height):
         """
-        herbavore pompoms move towards bushes
+        herb pompoms move towards bushes
         If bush isn't in sight, then do generic move
         """
         if self.mateReady == True:
@@ -330,10 +330,10 @@ class PomPom(object):
         """
         when the pom encounters food, increase it's energy
         """
-        if self.foodType == "herbavore":
+        if self.foodType == "herb":
             self.energy = self.energy + 10 #change value?
-        if self.foodType == "carnivore":
-            self.energy = self.energy + 100
+        if self.foodType == "carn":
+            self.energy = self.energy + 50
     
     
     def takeDamage(self):
@@ -341,12 +341,12 @@ class PomPom(object):
 
 
     def isMateReady(self):
-        if self.foodType == "herbavore":
+        if self.foodType == "herb":
             if self.energy > 50:
                 self.mateReady = True
             if self.energy < 30 or self.cooldown > 0:
                 self.mateReady = False
-        elif self.foodType == "carnavore":
+        elif self.foodType == "carn":
             if self.energy > 120:
                 self.mateReady = True
             if self.energy < 70 or self.cooldown > 0:
