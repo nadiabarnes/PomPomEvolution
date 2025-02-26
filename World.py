@@ -1,4 +1,3 @@
-from Evo import Evolution
 from Pom import PomPom
 from Food import Bush
 import random
@@ -22,6 +21,8 @@ class PomPomWorld:
 
         # Define probabilities for food types
         foodTypeWeights = {"herb": 1 - percentcarn, "carn": percentcarn}
+
+        #TODO ensure that the pom/bush is always placed
 
         # Spawn in PomPoms
         for _ in range(pomNumber):  # Rough number of starting PomPoms

@@ -49,7 +49,6 @@ class PomPom(object):
         """
         Handles PomPom's behavior per turn
         """
-        #TODO death doesn't work properly
         self.grid = grid #match pom's grid to current grid
         self.energy -= 1  # Loses energy each turn
         self.cooldown -= 1
@@ -60,7 +59,7 @@ class PomPom(object):
         self.findMate(len(self.grid), len(self.grid)) 
         self.findFood(len(self.grid), len(self.grid))
         self.updateAdjacentTiles(len(self.grid), len(self.grid))
-        self.vision(5)
+        self.vision(5) #can change 5 to any odd num to change vision size
         self.visionTilesUpdate(5)
 
         return self.grid
@@ -282,6 +281,9 @@ class PomPom(object):
         """
         if self.mateReady == True:
             return
+        if self.energy > 120:
+            self.genericMove
+            return
         closest_bush = None
         min_distance = float('inf')
         dx, dy = 0, 0  # Default movement direction (no movement)
@@ -407,8 +409,12 @@ class PomPom(object):
     
 
     def successfulMate(self, mate):
-        self.energy -= 20  # Reduce energy
-        self.cooldown = 10
+        if self.foodType == "herb":
+            self.energy -= 20  # Reduce energy
+            self.cooldown = 10
+        if self.foodType == "carn":
+            self.energy -= 50
+            self.cooldown = 40
         self.spawnBabies(mate)
 
 
@@ -417,7 +423,7 @@ class PomPom(object):
         when a different pompom mates with you, you still loose then energy and cooldown
         """
         self.energy -= 20  # Reduce energy
-        self.cooldown = 10  # 10-round cooldown
+        self.cooldown = 40  # 10-round cooldown
 
 
     def spawnBabies(self, mate):

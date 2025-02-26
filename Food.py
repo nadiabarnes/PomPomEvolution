@@ -10,7 +10,7 @@ class Bush:
         
     def eaten(self):
         """ PomPom eats the bush, triggering cooldown. """
-        self.cooldown = 5  # Goes on a 5-turn cooldown
+        self.cooldown = 10  # Goes on a 5-turn cooldown
 
     def update(self, grid):
         """ Regenerates after cooldown expires. """
