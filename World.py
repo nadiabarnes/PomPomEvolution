@@ -50,6 +50,20 @@ class PomPomWorld:
         self.updateFood()
         self.updatePomPoms()
 
+        #active is true if there are living poms
+        #and at least two of them are carnivores
+        active = False
+        carnCount = 0
+        for pom in self.pompoms:
+            if pom.energy > 0:
+                active = True
+            if pom.foodType == "carn":
+                carnCount += 1
+        if carnCount >= 2:
+            active = True
+        return active
+
+
 
     def updateFood(self):
         new_grid = self.grid  # Keep the current grid reference
@@ -104,6 +118,7 @@ class PomPomWorld:
         self.drawBushes(screen)
         self.drawPomPomsFoodtype(screen,font,text_color)
         self.drawLivingPomPomCount(screen, font)
+        self.drawPomPomFoodTypeMetrics(screen, font)
         
         pygame.display.flip() #update the screen
     
@@ -130,6 +145,42 @@ class PomPomWorld:
         # Draw the text inside the box
         screen.blit(count_text, (box_rect.x + 5, box_rect.y + 5))  # Position the text inside the box
 
+
+    def drawPomPomFoodTypeMetrics(self, screen, font):
+        """
+        Draws two boxes on the top-right corner of the screen displaying different PomPom metrics.
+        """
+        # Count the number of living PomPoms
+        carn_pompoms = len([pompom for pompom in self.pompoms if (pompom.energy > 0 and pompom.foodType == "carn")])
+        herb_pompoms = len([pompom for pompom in self.pompoms if (pompom.energy > 0 and pompom.foodType == "herb")])
+
+        # Create the text for each metric
+        living_text = font.render(f"Carn PomPoms: {carn_pompoms}", True, (255, 255, 255))
+        energy_text = font.render(f"Herb PomPoms: {herb_pompoms}", True, (255, 255, 255))
+
+        # Define the position and size for the boxes
+        box_width = max(living_text.get_width(), energy_text.get_width()) + 20  # Use the wider text
+        box_height = living_text.get_height() + 20
+        screen_width, screen_height = screen.get_size()
+
+        # First box (Living PomPoms) at the top-right
+        box1_x = screen_width - box_width - 10  # 10px padding from right
+        box1_y = 10  # 10px padding from top
+        box1_rect = pygame.Rect(box1_x, box1_y, box_width, box_height)
+
+        # Second box (Avg Energy) directly below the first one
+        box2_y = box1_y + box_height + 10  # 10px padding between boxes
+        box2_rect = pygame.Rect(box1_x, box2_y, box_width, box_height)
+
+        # Draw the boxes (background)
+        pygame.draw.rect(screen, (0, 0, 0), box1_rect)  # Black background
+        pygame.draw.rect(screen, (255, 255, 255), box1_rect, 2)  # White border
+        pygame.draw.rect(screen, (0, 0, 0), box2_rect)  # Black background
+        pygame.draw.rect(screen, (255, 255, 255), box2_rect, 2)  # White border
+
+        # Draw the text inside each box
+        screen.blit(living_text, (box1_rect.x + 10, box1_rect.y + 10))  # Living PomPoms
+        screen.blit(energy_text, (box2_rect.x + 10, box2_rect.y + 10))  # Avg Energy
 
 
     def drawBushes(self, screen):

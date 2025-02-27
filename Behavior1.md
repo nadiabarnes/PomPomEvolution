@@ -85,7 +85,6 @@ Simplest way is describe their global variables and update method.
     Carns get horny at 120 energy, and get hungry at 70.
 7) poms can't breed if their cooldown is above 0. They are born with a cooldown of 20, so they can't
     breed for a bit. After a mating successfully, herbs gain a cooldown of 20 while carns gain 50.
-
 8) Generally the poms look for mates if they are horny and food if they are hungry (or in cooldown).
     If they don't see what they are looking for, they do their generic move pattern.
     After they move, they update what they can see and the tiles around then.
