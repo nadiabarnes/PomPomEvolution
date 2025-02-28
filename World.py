@@ -29,7 +29,7 @@ class PomPomWorld:
             x, y = random.randint(0, width - 1), random.randint(0, height - 1)
             if not self.grid[x][y]:
                 food = random.choices(list(foodTypeWeights.keys()), weights=foodTypeWeights.values())[0]
-                pattern = random.choice(["random", "roomba"])
+                pattern = random.choice(["random", "roomba", "wander"])
                 newPom = PomPom(x, y, self.grid, pattern, food)
 
                 self.grid[x][y] = newPom
@@ -116,7 +116,7 @@ class PomPomWorld:
 
         #self.drawVisableTiles(screen)
         self.drawBushes(screen)
-        self.drawPomPomsFoodtype(screen,font,text_color)
+        self.drawPomPomsMovePattern(screen,font,text_color)
         self.drawLivingPomPomCount(screen, font)
         self.drawPomPomFoodTypeMetrics(screen, font)
         
@@ -249,6 +249,37 @@ class PomPomWorld:
                     screen.blit(energy_text, text_rect)
 
 
+    def drawPomPomsMovePattern(self, screen, font, text_color):
+        for x in range(self.width):
+            for y in range(self.height):
+                if self.grid[x][y]: #if there is a pompom in this spot
+                    pompom = self.grid[x][y]
+                    if pompom.movePattern == "random":
+                        pygame.draw.rect(
+                            screen,
+                            (65, 255, 110),  #Green for herb
+                            (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
+                        )
+                    elif pompom.movePattern == "roomba":
+                        pygame.draw.rect(
+                            screen,
+                            (255, 184, 74),  #Yellow for omivore
+                            (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
+                        )
+                    elif pompom.movePattern == "wander":
+                        pygame.draw.rect(
+                            screen,
+                            (212, 30, 60),  #Red for carn
+                            (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
+                        )
+                    energy_text = font.render(str(pompom.energy), True, text_color)
+                    text_rect = energy_text.get_rect(center=(
+                        x * self.cell_size + self.cell_size // 2,
+                        y * self.cell_size + self.cell_size // 2
+                    ))
+                    screen.blit(energy_text, text_rect)
+
+
     def drawPomPoms(self, screen, font, text_color):
         for x in range(self.width):
             for y in range(self.height):
@@ -266,7 +297,6 @@ class PomPomWorld:
                     ))
                     screen.blit(energy_text, text_rect)
     
-
     
     def drawVisableTiles(self, screen):
         for x in range(self.width):

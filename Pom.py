@@ -23,10 +23,11 @@ class PomPom(object):
         self.rect = pygame.Rect(x, y, 1, 1)
         #set the pom's generic move pattern
         if movePattern == None:
-            movePatterns = ["random","roomba"]
+            movePatterns = ["random", "roomba", "wander"] 
             self.movePattern = random.choice(movePatterns)
         else:
             self.movePattern = movePattern
+        self.turnCount = 0 #for move the extendedrandom move pattern
         #What the pom considers food
         if foodType == None:
             foodTypes = ["herb","carn"] #removed omnivore temp
@@ -187,11 +188,39 @@ class PomPom(object):
             self.randomMove(width, height)
         elif self.movePattern== "roomba":
             self.moveForward(width,height)
+        elif self.movePattern == "wander":
+            self.randomExtended(width, height)
         else: pass
+
+    
+    def randomExtended(self, width, height):
+        """
+        Move 3-10 steps then turn a random direction.
+        """
+        moves = {'N': (0, -1),
+                    'E': (-1, 0),
+                    'S': (0, 1),
+                    'W': (1, 0)}
+        if self.turnCount <= 0:
+            self.turnCount = random.randint(3,10)
+            moveChoice = random.choice(list(moves.items()))  # Pick a (key, value) pair
+            facing, (dx, dy) = moveChoice  # Extract direction and movement tuple
+            self.facing = facing  # Store the chosen direction #TODO use self.updateFacing
+        else:
+            moveChoice = moves[self.facing]
+            (dx, dy) = moveChoice
+            self.turnCount -= 1
+        new_rect = self.rect.move(dx, dy)
+        # Ensure movement stays within bounds
+        if 0 <= new_rect.x < width and 0 <= new_rect.y < height:
+            self.rect = new_rect
+        else:
+            self.randomMove(width, height)
     
 
     def randomMove(self, width, height):
         """
+        aka "random"
         Moves the PomPom towards food (if found), or makes a random move if no food is visible.
         Ensures it does not move out of bounds and updates the facing direction correctly.
         Updates facing.
@@ -213,6 +242,7 @@ class PomPom(object):
 
     def moveForward(self, width, height):
         """
+        aka "roomba"
         Roomba Style Movement. move in direction pom is facing,
         turn a random direction if cannot move forward
         """
