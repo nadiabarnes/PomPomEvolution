@@ -116,7 +116,7 @@ class PomPomWorld:
 
         #self.drawVisableTiles(screen)
         self.drawBushes(screen)
-        self.drawPomPomsMovePattern(screen,font,text_color)
+        self.drawPomPomsFoodtype(screen,font,text_color)
         self.drawLivingPomPomCount(screen, font)
         self.drawPomPomFoodTypeMetrics(screen, font)
         

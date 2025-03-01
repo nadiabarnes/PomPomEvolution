@@ -499,7 +499,3 @@ class PomPom(object):
     
         return PomPom(x, y, self.grid, pattern, food)
 
-
-    
-
-
