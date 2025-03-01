@@ -36,7 +36,7 @@ class PomPomWorld:
                 self.pompoms.append(self.grid[x][y])
 
         # Spawn in bushes
-        for _ in range(bushNumber):  # Rough starting number of bushes
+        for _ in range(int(bushNumber)):  # Rough starting number of bushes
             x, y = random.randint(0, width - 1), random.randint(0, height - 1)
             if not self.grid[x][y]:
                 self.grid[x][y] = Bush(x, y, self.grid)
@@ -61,6 +61,7 @@ class PomPomWorld:
                 carnCount += 1
         if carnCount >= 2:
             active = True
+        else: active = False
         return active
 
 
