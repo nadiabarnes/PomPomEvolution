@@ -8,7 +8,11 @@ class PomPomWorld:
     """
     This will handle the board/world for PomPomEvolution
     """
-    def __init__(self, width=20, height=20, cell_size=20, pomNumber=2, bushNumber=20, percentcarn=.2):
+    def __init__(self, width=20, height=20, cell_size=20, pomNumber=2, bushNumber=20, percentcarn=.2, 
+                 herbStartMate = 50, herbEndMate = 39, carnStartMate = 120, carnEndMate = 70, 
+                 carnDamage = 50, herbEatEnergy = 10, carnEatEnergy = 50, carnEnergyCap = 300, 
+                 herbMateCooldown = 20, herbMateLoss = 30, carnMateCooldown = 40, carnMateLoss=20,
+                 herbVisionSize = 3, carnVisionSize = 7):
         """
         Board variables
         """
@@ -19,6 +23,21 @@ class PomPomWorld:
         self.bushes = []
         self.pompoms = [] 
         self.epoch = 0
+
+        self.herbStartMate = herbStartMate
+        self.herbEndMate = herbEndMate
+        self.carnStartMate = carnStartMate
+        self.carnEndMate = carnEndMate
+        self.carnDamage = carnDamage
+        self.herbEatEnergy = herbEatEnergy
+        self.carnEatEnergy = carnEatEnergy
+        self.carnEnergyCap = carnEnergyCap
+        self.herbMateCooldown = herbMateCooldown
+        self.herbMateLoss = herbMateLoss
+        self.carnMateCooldown = carnMateCooldown
+        self.carnMateLoss = carnMateLoss
+        self.herbVisionSize = herbVisionSize
+        self.carnVisionSize = carnVisionSize
 
         # Define probabilities for food types
         foodTypeWeights = {"herb": 1 - percentcarn, "carn": percentcarn}
@@ -31,7 +50,8 @@ class PomPomWorld:
             if not self.grid[x][y]:
                 food = random.choices(list(foodTypeWeights.keys()), weights=foodTypeWeights.values())[0]
                 pattern = random.choice(["random", "roomba", "wander"])
-                newPom = PomPom(x, y, self.grid, pattern, food)
+                newPom = PomPom(x, y, self.grid, pattern, food, herbVisionSize=self.herbVisionSize, 
+                                carnVisionSize=self.carnVisionSize)
 
                 self.grid[x][y] = newPom
                 self.pompoms.append(self.grid[x][y])
@@ -81,7 +101,10 @@ class PomPomWorld:
         new_pompoms = []  # To store PomPoms that are still alive
 
         for pompom in self.pompoms:
-            pompom.update(self.grid)  # Update PomPom behavior
+            pompom.update(self.grid, self.herbStartMate, self.herbEndMate, self.carnStartMate, 
+                          self.carnEndMate, self.carnDamage, self.herbEatEnergy, self.carnEatEnergy,
+                          self.carnEnergyCap, self.herbMateCooldown, self.herbMateLoss, 
+                          self.carnMateCooldown, self.carnMateLoss)  # Update PomPom behavior
 
             if pompom.energy <= 0:  # If it dies, don't add to the new grid
                 continue  # Skip dead PomPom

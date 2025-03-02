@@ -9,7 +9,7 @@ class PomPom(object):
     This will track an individual pompom and it's behavior
     """
 
-    def __init__(self, x, y, grid, movePattern=None, foodType=None):
+    def __init__(self, x, y, grid, movePattern=None, foodType=None, herbVisionSize=3, carnVisionSize=7):
         #import the world grid
         self.grid = grid
         #energy increases when food is eaten, decreases by 1 each turn
@@ -43,7 +43,9 @@ class PomPom(object):
         self.adjacentTiles = [None for _ in range(9)]
         self.foodTypeSpecificSetup()
         #initiate vision and adjacency
-        self.foodTypeVision(3, 7)
+        self.herbSize = herbVisionSize
+        self.carnSize = carnVisionSize
+        self.foodTypeVision()
         self.updateAdjacentTiles(len(self.grid), len(self.grid))
     
 
@@ -56,16 +58,18 @@ class PomPom(object):
             self.cooldown = 200
     
 
-    def foodTypeVision(self, herbSize, carnSize):
+    def foodTypeVision(self):
         if self.foodType == "herb":
-            self.vision(herbSize)
-            self.visionTilesUpdate(herbSize)
+            self.vision(self.herbSize)
+            self.visionTilesUpdate(self.herbSize)
         if self.foodType == "carn":
-            self.vision(carnSize)
-            self.visionTilesUpdate(carnSize)
+            self.vision(self.carnSize)
+            self.visionTilesUpdate(self.carnSize)
         
 
-    def update(self, grid):
+    def update(self, grid, herbStartMate, herbEndMate, carnStartMate, carnEndMate,
+                carnDamage, herbEatEnergy, carnEatEnergy, carnEnergyCap, herbMateCooldown,
+                herbMateLoss, carnMateCooldown, carnMateLoss):
         """
         Handles PomPom's behavior per turn
         """
@@ -77,7 +81,8 @@ class PomPom(object):
         
         #herb/carnStart is the energy threshold to be horny
         #herb/carnEnd is the energy threshold to be hungry
-        self.isMateReady(herbStart = 50, herbEnd = 30, carnStart = 120, carnEnd = 70)
+        self.isMateReady(herbStart = herbStartMate, herbEnd = herbEndMate, 
+                         carnStart = carnStartMate, carnEnd = carnEndMate)
 
         if self.flee > 0:
             #flee time is how many turns they are frightened
@@ -86,18 +91,20 @@ class PomPom(object):
         elif self.mateReady:
             #herb/carnCooldown is how many turns until they can be horny again
             #herb/carnLoss is energy loss for mating
-            self.findMate(len(self.grid), len(self.grid), herbCooldown = 10, herbLoss = 20, 
-                          carnCooldown = 40, carnLoss = 20) 
+            self.findMate(len(self.grid), len(self.grid), herbCooldown = herbMateCooldown, 
+                          herbLoss = herbMateLoss, 
+                          carnCooldown = carnMateCooldown, carnLoss = carnMateLoss) 
     
         else:
             #carnDamage is the damage(energy loss) carns can deal per turn
             #herb/carnEatValue is how much energy gained from eating
             #carnEnergyCap is when carns stop hunting. Trust it's needed
-            self.findFood(len(self.grid), len(self.grid), carnDamage = 40, herbEatValue=10, 
-                          carnEatValue=50, carnEnergyCap=300)
+            self.findFood(len(self.grid), len(self.grid), carnDamage = carnDamage, 
+                          herbEatValue=herbEatEnergy, carnEatValue=carnEatEnergy, 
+                          carnEnergyCap=carnEnergyCap)
         
         self.updateAdjacentTiles(len(self.grid), len(self.grid))
-        self.foodTypeVision(3, 7)
+        self.foodTypeVision()
 
         return self.grid
     
