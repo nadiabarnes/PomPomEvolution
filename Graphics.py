@@ -9,7 +9,7 @@ class Visualize:
     def __init__(self, world):
         self.world = world
 
-    def draw(self, screen):
+    def drawOLD(self, screen):
         """
         updates the screen
         """
@@ -25,6 +25,58 @@ class Visualize:
 
         pygame.display.flip() #update the screen
     
+
+    def draw(self, screen, panel_width):
+        """
+        Updates the screen, including the simulation and statistics panel.
+        """
+        screen.fill((21, 60, 74))  #Background Color for Simulation
+        font = pygame.font.Font(None, self.world.cell_size - 2)  # Font for statistics
+        text_color = (255, 255, 255)  # White text
+
+        # Draw the simulation area (left side)
+        self.drawBushes(screen, self.world)
+        self.drawPomPomsFoodtype(screen, font, text_color, self.world)
+        
+        # Draw the right-side panel
+        panel_x = self.world.width * self.world.cell_size  # Start drawing after the simulation grid
+        pygame.draw.rect(screen, (50, 50, 50), (panel_x, 0, panel_width, screen.get_height()))  # Dark grey panel
+
+        # Draw statistics in the panel
+        self.drawStatisticsPanel(screen, font, panel_x)
+
+        pygame.display.flip()  # Update the screen
+
+
+    def drawStatisticsPanel(self, screen, font, panel_x):
+        """
+        Displays statistics in the right panel.
+        """
+        padding = 10
+        y_offset = 20  # Starting Y position
+
+        # Titles
+        title_text = font.render("Statistics", True, (255, 255, 255))
+        screen.blit(title_text, (panel_x + padding, y_offset))
+        y_offset += 40
+
+        # Display PomPom Counts
+        living_pompoms = len([pompom for pompom in self.world.pompoms if pompom.energy > 0])
+        carn_pompoms = len([pompom for pompom in self.world.pompoms if pompom.energy > 0 and pompom.foodType == "carn"])
+        herb_pompoms = len([pompom for pompom in self.world.pompoms if pompom.energy > 0 and pompom.foodType == "herb"])
+
+        stats = [
+            f"Epoch: {self.world.epoch}",
+            f"Living PomPoms: {living_pompoms}",
+            f"Carnivores: {carn_pompoms}",
+            f"Herbivores: {herb_pompoms}",
+        ]
+
+        # Display each stat
+        for stat in stats:
+            text_surface = font.render(stat, True, (255, 255, 255))
+            screen.blit(text_surface, (panel_x + padding, y_offset))
+            y_offset += 30
 
 
     def drawLivingPomPomCount(self, screen, font, world):
