@@ -75,13 +75,27 @@ class PomPom(object):
         if self.energy <= 0:
             return self.grid  # don't do anyhthing if dead
         
-        self.isMateReady()
+        #herb/carnStart is the energy threshold to be horny
+        #herb/carnEnd is the energy threshold to be hungry
+        self.isMateReady(herbStart = 50, herbEnd = 30, carnStart = 120, carnEnd = 70)
+
         if self.flee > 0:
-            self.runFromCarn(len(self.grid), len(self.grid))
+            #flee time is how many turns they are frightened
+            self.runFromCarn(len(self.grid), len(self.grid), fleeTime=5)
+
         elif self.mateReady:
-            self.findMate(len(self.grid), len(self.grid)) 
+            #herb/carnCooldown is how many turns until they can be horny again
+            #herb/carnLoss is energy loss for mating
+            self.findMate(len(self.grid), len(self.grid), herbCooldown = 10, herbLoss = 20, 
+                          carnCooldown = 40, carnLoss = 20) 
+    
         else:
-            self.findFood(len(self.grid), len(self.grid))
+            #carnDamage is the damage(energy loss) carns can deal per turn
+            #herb/carnEatValue is how much energy gained from eating
+            #carnEnergyCap is when carns stop hunting. Trust it's needed
+            self.findFood(len(self.grid), len(self.grid), carnDamage = 40, herbEatValue=10, 
+                          carnEatValue=50, carnEnergyCap=300)
+        
         self.updateAdjacentTiles(len(self.grid), len(self.grid))
         self.foodTypeVision(3, 7)
 
@@ -265,8 +279,8 @@ class PomPom(object):
         else:
             self.randomMove(width, height)
     
-
-    def runFromCarn(self, width, height):
+    #TODO test this
+    def runFromCarn(self, width, height, fleeTime):
         """
         herbs move away from carns if they see them
         """
@@ -289,7 +303,7 @@ class PomPom(object):
 
         if closest_pom:
             #if there is a carn, move away from it in one direction for x rounds
-            self.flee = 5
+            self.flee = fleeTime
             #only do something if you see a carn
             pomx, pomy = closest_pom.rect.x, closest_pom.rect.y  # Closest poms's coordinates
 
@@ -310,23 +324,22 @@ class PomPom(object):
             self.moveForward(width, height)
 
 
-
-    def findFood(self, width, height):
+    def findFood(self, width, height, carnDamage, carnEatValue, herbEatValue, carnEnergyCap):
         if self.foodType == "herb":
-            self.seekBushes(width, height)
+            self.seekBushes(width, height, herbEatValue)
         elif self.foodType == "omnivore":
-            self.seekBushes(width, height)
+            self.seekBushes(width, height, herbEatValue)
         elif self.foodType == "carn":
-            self.seekPomPoms(width, height)
+            self.seekPomPoms(width, height, carnDamage, carnEatValue, carnEnergyCap)
     
 
-    def seekPomPoms(self, width, height):
+    def seekPomPoms(self, width, height, carnDamage, carnEatValue, carnEnergyCap):
         """
         carns look for pompoms to eat
         only hunts other carns if no herbs available
         if they have energy over cap, generic move
         """
-        if self.energy > 300:
+        if self.energy > carnEnergyCap:
             self.genericMove(width, height)
             return
         closest_pom = None
@@ -352,9 +365,9 @@ class PomPom(object):
             # If the pom is adjacent, stay still, pom, and enter cooldown
             if (pomx, pomy) in self.adjacentTiles:
                 dx, dy = 0, 0
-                closest_pom.takeDamage()
+                closest_pom.takeDamage(carnDamage)
                 if closest_pom.energy <= 0:
-                    self.eat()
+                    self.eat(carnEatValue = carnEatValue)
                 return  # Exit function after mating
 
             # Move towards the pom if not adjacent
@@ -377,7 +390,7 @@ class PomPom(object):
             self.genericMove(width, height)  # If no pom is found, move randomly
 
 
-    def seekBushes(self, width, height):
+    def seekBushes(self, width, height, herbEatValue):
         """
         herb pompoms move towards bushes
         If bush isn't in sight, then do generic move
@@ -400,7 +413,7 @@ class PomPom(object):
         if closest_bush:
             if self.rect.x == closest_bush.rect.x and self.rect.y == closest_bush.rect.y and closest_bush.cooldown == 0:
                 #if on top of closest bush, eat it
-                self.eat()  # Gain energy from eating
+                self.eat(herbEatValue = herbEatValue)  # Gain energy from eating
                 closest_bush.eaten()
                 return
             else:
@@ -426,34 +439,37 @@ class PomPom(object):
             self.genericMove(width, height)  # If no bush found, move randomly
     
 
-    def eat(self):
+    def eat(self, herbEatValue = 10, carnEatValue = 50):
         """
         when the pom encounters food, increase it's energy
         """
         if self.foodType == "herb":
-            self.energy = self.energy + 10 #change value?
+            self.energy = self.energy + herbEatValue
         if self.foodType == "carn":
-            self.energy = self.energy + 50
+            self.energy = self.energy + carnEatValue
     
     
-    def takeDamage(self):
-        self.energy = self.energy - 30
+    def takeDamage(self, damage):
+        """
+        when another pom attacks
+        """
+        self.energy = self.energy - damage
 
 
-    def isMateReady(self):
+    def isMateReady(self, herbStart, herbEnd, carnStart, carnEnd):
         if self.foodType == "herb":
-            if self.energy > 50:
+            if self.energy > herbStart:
                 self.mateReady = True
-            if self.energy < 30 or self.cooldown > 0:
+            if self.energy < herbEnd or self.cooldown > 0:
                 self.mateReady = False
         elif self.foodType == "carn":
-            if self.energy > 120:
+            if self.energy > carnStart:
                 self.mateReady = True
-            if self.energy < 70 or self.cooldown > 0:
+            if self.energy < carnEnd or self.cooldown > 0:
                 self.mateReady = False
 
 
-    def findMate(self, width, height):
+    def findMate(self, width, height, herbCooldown, herbLoss, carnCooldown, carnLoss):
         """
         If the PomPom has enough energy, try to reproduce
         """
@@ -479,8 +495,8 @@ class PomPom(object):
             # If the mate is adjacent, stay still, mate, and enter cooldown
             if (pomx, pomy) in self.adjacentTiles:
                 dx, dy = 0, 0
-                self.successfulMate(closest_pom)
-                closest_pom.gotMated()
+                self.successfulMate(closest_pom, herbCooldown, herbLoss, carnCooldown, carnLoss)
+                closest_pom.gotMated(herbCooldown, herbLoss, carnCooldown, carnLoss)
                 return  # Exit function after mating
 
             # Move towards the mate if not adjacent
@@ -501,24 +517,28 @@ class PomPom(object):
                 self.genericMove(width, height)  # If pathfinding leads outside, move randomly
         else:
             self.genericMove(width, height)  # If no mate is found, move randomly
-    
 
-    def successfulMate(self, mate):
+
+    def successfulMate(self, mate, herbCooldown, herbLoss, carnCooldown, carnLoss):
         if self.foodType == "herb":
-            self.energy -= 20  # Reduce energy
-            self.cooldown = 10
+            self.energy -= herbLoss  # Reduce energy
+            self.cooldown = herbCooldown
         if self.foodType == "carn":
-            self.energy -= 20
-            self.cooldown = 40
+            self.energy -= carnLoss
+            self.cooldown = carnCooldown
         self.spawnBabies(mate)
 
 
-    def gotMated(self):
+    def gotMated(self, herbCooldown, herbLoss, carnCooldown, carnLoss):
         """
         when a different pompom mates with you, you still loose then energy and cooldown
         """
-        self.energy -= 20  # Reduce energy
-        self.cooldown = 40  # 10-round cooldown
+        if self.foodType == "herb":
+            self.energy -= herbLoss  # Reduce energy
+            self.cooldown = herbCooldown
+        if self.foodType == "carn":
+            self.energy -= carnLoss
+            self.cooldown = carnCooldown
 
 
     def spawnBabies(self, mate):

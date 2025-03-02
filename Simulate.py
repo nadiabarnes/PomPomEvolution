@@ -23,6 +23,7 @@ def main():
     pomNumber = 50
     bushNumber = 300
     percentcarn = 0.1
+    gameSpeed = 20
 
     world, screen, graphics = initialize(width, height, cellsize, pomNumber, 
                                bushNumber, percentcarn)  # Use the corrected function
@@ -40,7 +41,7 @@ def main():
         else:
             graphics.draw(screen)
             pygame.display.flip()  # Ensure the screen updates
-            clock.tick(20)  # updates per second
+            clock.tick(gameSpeed)  # updates per second
 
     pygame.quit()
 
