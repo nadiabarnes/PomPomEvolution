@@ -19,7 +19,7 @@ def main():
 
     width = 35
     height = 35
-    cellsize = 15
+    cellsize = 20
     pomNumber = 50
     bushNumber = 300
     percentcarn = 0.1
@@ -35,7 +35,7 @@ def main():
                 running = False
         
         if world.update() == False: #if there aren't enough poms, restart the sim
-            world, screen = initialize(width, height, cellsize, pomNumber, 
+            world, screen, graphics = initialize(width, height, cellsize, pomNumber, 
                                        bushNumber, percentcarn)  # Restart world and screen
         else:
             graphics.draw(screen)

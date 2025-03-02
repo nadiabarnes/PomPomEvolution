@@ -37,6 +37,8 @@ class PomPom(object):
         #the pom's mating availability
         self.mateReady = False
         self.cooldown = 40
+        #the pom's flee counter
+        self.flee = 0
         #tiles surrounding the pom
         self.adjacentTiles = [None for _ in range(9)]
         self.foodTypeSpecificSetup()
@@ -74,8 +76,12 @@ class PomPom(object):
             return self.grid  # don't do anyhthing if dead
         
         self.isMateReady()
-        self.findMate(len(self.grid), len(self.grid)) 
-        self.findFood(len(self.grid), len(self.grid))
+        if self.flee > 0:
+            self.runFromCarn(len(self.grid), len(self.grid))
+        elif self.mateReady:
+            self.findMate(len(self.grid), len(self.grid)) 
+        else:
+            self.findFood(len(self.grid), len(self.grid))
         self.updateAdjacentTiles(len(self.grid), len(self.grid))
         self.foodTypeVision(3, 7)
 
@@ -260,6 +266,51 @@ class PomPom(object):
             self.randomMove(width, height)
     
 
+    def runFromCarn(self, width, height):
+        """
+        herbs move away from carns if they see them
+        """
+        closest_pom = None
+        min_distance = float('inf')
+        dx, dy = 0, 0  #Default movement direction (no movement)
+
+        if self.foodType != "herb":
+            #only herbs run away
+            return
+        for tile in self.visableTiles:
+            x, y = tile #coords of current tile
+            if self.grid[x][y] and isinstance(self.grid[x][y], PomPom): #if pompom visable
+                pom = self.grid[x][y] #save the pom
+                if pom is not self and self.grid[x][y].rect.colliderect(self.vis): #maybe remove grid collision?
+                        distance = abs(self.rect.centerx - pom.rect.centerx) + abs(self.rect.centery - pom.rect.centery)
+                        if pom.foodType == "carn" and distance < min_distance:
+                            min_distance = distance
+                            closest_pom = pom #closest visable carn
+
+        if closest_pom:
+            #if there is a carn, move away from it in one direction for x rounds
+            self.flee = 5
+            #only do something if you see a carn
+            pomx, pomy = closest_pom.rect.x, closest_pom.rect.y  # Closest poms's coordinates
+
+            x_dist = self.rect.x - pomx
+            y_dist = self.rect.y - pomy
+
+            if abs(x_dist) > abs(y_dist):  # Prioritize horizontal movement
+                dx = numpy.sign(x_dist)
+            else:  # Otherwise, move vertically
+                dy = numpy.sign(y_dist)
+
+            # Move the PomPom
+            new_rect = self.rect.move(dx, dy)
+            if 0 <= new_rect.x < width and 0 <= new_rect.y < height:
+                self.updateFacing(self.rect.x, self.rect.y, new_rect.x, new_rect.y)
+                self.rect = new_rect
+        else:
+            self.moveForward(width, height)
+
+
+
     def findFood(self, width, height):
         if self.foodType == "herb":
             self.seekBushes(width, height)
@@ -270,8 +321,11 @@ class PomPom(object):
     
 
     def seekPomPoms(self, width, height):
-        if self.mateReady == True:
-            return
+        """
+        carns look for pompoms to eat
+        only hunts other carns if no herbs available
+        if they have energy over cap, generic move
+        """
         if self.energy > 300:
             self.genericMove(width, height)
             return
@@ -328,8 +382,6 @@ class PomPom(object):
         herb pompoms move towards bushes
         If bush isn't in sight, then do generic move
         """
-        if self.mateReady == True:
-            return
         closest_bush = None
         min_distance = float('inf')
         dx, dy = 0, 0  # Default movement direction (no movement)
@@ -405,9 +457,6 @@ class PomPom(object):
         """
         If the PomPom has enough energy, try to reproduce
         """
-        if not self.mateReady:
-            return
-
         closest_pom = None
         min_distance = float('inf')
         dx, dy = 0, 0  # Default movement direction (no movement)
