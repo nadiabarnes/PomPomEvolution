@@ -1,20 +1,31 @@
 from World import PomPomWorld
+from Graphics import Visualize
 import pygame
 
 """
 This will actually run a simulation
 """
 
-def initialize(width, height, pomNumber, bushNumber, percentcarn):
+def initialize(width, height, cellsize, pomNumber, bushNumber, percentcarn):
     pygame.init()
-    world = PomPomWorld(width, height, 20, pomNumber, bushNumber, percentcarn) 
+    world = PomPomWorld(width, height, cellsize, pomNumber, bushNumber, percentcarn) 
     screen = pygame.display.set_mode((world.width * world.cell_size, world.height * world.cell_size))
+    graphics = Visualize(world)
     pygame.display.set_caption("PomPom Evolution")
-    return world, screen  # Return both world and screen
+    return world, screen, graphics  # Return both world and screen
 
 def main():
     pygame.init()
-    world, screen = initialize(width=35, height=35, pomNumber=10, bushNumber=300, percentcarn=0.5)  # Use the corrected function
+
+    width = 35
+    height = 35
+    cellsize = 15
+    pomNumber = 50
+    bushNumber = 300
+    percentcarn = 0.1
+
+    world, screen, graphics = initialize(width, height, cellsize, pomNumber, 
+                               bushNumber, percentcarn)  # Use the corrected function
     running = True
     clock = pygame.time.Clock()
 
@@ -23,10 +34,11 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
         
-        if world.update() == False:
-            world, screen = initialize(width=35, height=35, pomNumber=10, bushNumber=300, percentcarn=0.5)  # Restart world and screen
+        if world.update() == False: #if there aren't enough poms, restart the sim
+            world, screen = initialize(width, height, cellsize, pomNumber, 
+                                       bushNumber, percentcarn)  # Restart world and screen
         else:
-            world.draw(screen)
+            graphics.draw(screen)
             pygame.display.flip()  # Ensure the screen updates
             clock.tick(20)  # updates per second
 
