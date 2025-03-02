@@ -10,10 +10,10 @@ def main():
     pygame.init()
 
     #world traits
-    width = 100
-    height = 100
-    pomNumber = 50
-    bushNumber = 300
+    width = 50
+    height = 50
+    pomNumber = 20
+    bushNumber = 150
     percentcarn = 0.1
     gameSpeed = 20
 
@@ -33,6 +33,7 @@ def main():
     herbVisionSize = 3 #len one size of vision square. MUST BE ODD
     carnVisionSize = 7
 
+    #TODO make bush cooldown modifiable
     
     PANEL_WIDTH = 200 
     SCREEN_WIDTH = 700 + PANEL_WIDTH  # Fixed screen width (Simulation + Panel)

@@ -49,6 +49,7 @@ class PomPom(object):
         self.updateAdjacentTiles(len(self.grid), len(self.grid))
     
 
+    #TODO make these changable in simulate
     def foodTypeSpecificSetup(self):
         if self.foodType == "herb":
             self.energy = 10

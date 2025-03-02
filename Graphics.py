@@ -42,17 +42,18 @@ class Visualize:
         panel_x = self.world.width * self.world.cell_size  # Start drawing after the simulation grid
         pygame.draw.rect(screen, (50, 0, 20), (panel_x, 0, panel_width, screen.get_height()))  #black panel
 
-        self.drawStatisticsPanel(screen, font, panel_x)
+        self.drawStatisticsPanel(screen, panel_x)
 
         pygame.display.flip()  # Update the screen
 
 
-    def drawStatisticsPanel(self, screen, font, panel_x):
+    def drawStatisticsPanel(self, screen, panel_x):
         """
         Displays statistics in the right panel.
         """
         padding = 10
         y_offset = 20  # Starting Y position
+        font = pygame.font.Font("FontFileMontserrat.ttf", 16)
 
         # Titles
         title_text = font.render("Statistics", True, (255, 255, 255))
