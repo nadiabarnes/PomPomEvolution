@@ -32,7 +32,7 @@ class Visualize:
         """
         screen.fill((21, 60, 74))  #Background Color for Simulation
         font = pygame.font.Font(None, self.world.cell_size - 2)  # Font for statistics
-        text_color = (255, 255, 255)  # White text
+        text_color = (0, 0, 0)  # black text
 
         # Draw the simulation area (left side)
         self.drawBushes(screen, self.world)
@@ -40,9 +40,8 @@ class Visualize:
         
         # Draw the right-side panel
         panel_x = self.world.width * self.world.cell_size  # Start drawing after the simulation grid
-        pygame.draw.rect(screen, (50, 50, 50), (panel_x, 0, panel_width, screen.get_height()))  # Dark grey panel
+        pygame.draw.rect(screen, (50, 0, 20), (panel_x, 0, panel_width, screen.get_height()))  #black panel
 
-        # Draw statistics in the panel
         self.drawStatisticsPanel(screen, font, panel_x)
 
         pygame.display.flip()  # Update the screen
@@ -64,12 +63,18 @@ class Visualize:
         living_pompoms = len([pompom for pompom in self.world.pompoms if pompom.energy > 0])
         carn_pompoms = len([pompom for pompom in self.world.pompoms if pompom.energy > 0 and pompom.foodType == "carn"])
         herb_pompoms = len([pompom for pompom in self.world.pompoms if pompom.energy > 0 and pompom.foodType == "herb"])
+        random_poms = len([pompom for pompom in self.world.pompoms if pompom.energy > 0 and pompom.movePattern == "random"])
+        roomba_poms = len([pompom for pompom in self.world.pompoms if pompom.energy > 0 and pompom.movePattern == "roomba"])
+        wander_poms = len([pompom for pompom in self.world.pompoms if pompom.energy > 0 and pompom.movePattern == "wander"])
 
         stats = [
             f"Epoch: {self.world.epoch}",
-            f"Living PomPoms: {living_pompoms}",
-            f"Carnivores: {carn_pompoms}",
-            f"Herbivores: {herb_pompoms}",
+            f"PomPoms: {living_pompoms}",
+            f"Carns: {carn_pompoms}",
+            f"Herbs: {herb_pompoms}",
+            f"Random Movers: {random_poms}",
+            f"Roomba Movers: {roomba_poms}",
+            f"Wander Movers: {wander_poms}"
         ]
 
         # Display each stat

@@ -10,8 +10,8 @@ def main():
     pygame.init()
 
     #world traits
-    width = 35
-    height = 35
+    width = 100
+    height = 100
     pomNumber = 50
     bushNumber = 300
     percentcarn = 0.1
