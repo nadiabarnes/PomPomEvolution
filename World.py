@@ -12,7 +12,8 @@ class PomPomWorld:
                  herbStartMate = 50, herbEndMate = 39, carnStartMate = 120, carnEndMate = 70, 
                  carnDamage = 50, herbEatEnergy = 10, carnEatEnergy = 50, carnEnergyCap = 300, 
                  herbMateCooldown = 20, herbMateLoss = 30, carnMateCooldown = 40, carnMateLoss=20,
-                 herbVisionSize = 3, carnVisionSize = 7):
+                 herbVisionSize = 3, carnVisionSize = 7, herbStartEnergy=10, herbStartCooldown=40, 
+                 carnStartEnergy=100, carnStartCooldown=200):
         """
         Board variables
         """
@@ -38,6 +39,10 @@ class PomPomWorld:
         self.carnMateLoss = carnMateLoss
         self.herbVisionSize = herbVisionSize
         self.carnVisionSize = carnVisionSize
+        self.herbStartEnergy = herbStartEnergy
+        self.herbStartCooldown = herbStartCooldown
+        self.carnStartEnergy = carnStartEnergy
+        self.carnStartCooldown = carnStartCooldown
 
         # Define probabilities for food types
         foodTypeWeights = {"herb": 1 - percentcarn, "carn": percentcarn}
@@ -51,7 +56,9 @@ class PomPomWorld:
                 food = random.choices(list(foodTypeWeights.keys()), weights=foodTypeWeights.values())[0]
                 pattern = random.choice(["random", "roomba", "wander"])
                 newPom = PomPom(x, y, self.grid, pattern, food, herbVisionSize=self.herbVisionSize, 
-                                carnVisionSize=self.carnVisionSize)
+                                carnVisionSize=self.carnVisionSize, herbStartEnergy = self.herbStartEnergy,
+                                herbStartCooldown=self.herbStartCooldown, carnStartEnergy=self.carnStartEnergy,
+                                carnStartCooldown=self.carnStartCooldown)
 
                 self.grid[x][y] = newPom
                 self.pompoms.append(self.grid[x][y])

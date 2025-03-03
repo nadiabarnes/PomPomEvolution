@@ -9,7 +9,8 @@ class PomPom(object):
     This will track an individual pompom and it's behavior
     """
 
-    def __init__(self, x, y, grid, movePattern=None, foodType=None, herbVisionSize=3, carnVisionSize=7):
+    def __init__(self, x, y, grid, movePattern=None, foodType=None, herbVisionSize=3, carnVisionSize=7,
+                 herbStartEnergy=10, herbStartCooldown=40, carnStartEnergy=100, carnStartCooldown=200):
         #import the world grid
         self.grid = grid
         #energy increases when food is eaten, decreases by 1 each turn
@@ -41,7 +42,13 @@ class PomPom(object):
         self.flee = 0
         #tiles surrounding the pom
         self.adjacentTiles = [None for _ in range(9)]
-        self.foodTypeSpecificSetup()
+        self.foodTypeSpecificSetup(herbStartEnergy, herbStartCooldown, 
+                                   carnStartEnergy, carnStartCooldown)
+        #save inital values from world
+        self.herbStartEnergy = herbStartEnergy
+        self.carnStartEnergy = carnStartEnergy
+        self.herbStartCooldown = herbStartCooldown
+        self.carnStartCooldown = carnStartCooldown
         #initiate vision and adjacency
         self.herbSize = herbVisionSize
         self.carnSize = carnVisionSize
@@ -50,13 +57,14 @@ class PomPom(object):
     
 
     #TODO make these changable in simulate
-    def foodTypeSpecificSetup(self):
+    def foodTypeSpecificSetup(self, herbStartEnergy, herbStartCooldown,
+                              carnStartEnergy, canStartCooldown):
         if self.foodType == "herb":
-            self.energy = 10
-            self.cooldown = 40
+            self.energy = herbStartEnergy
+            self.cooldown = herbStartCooldown
         if self.foodType == "carn":
-            self.energy = 100
-            self.cooldown = 200
+            self.energy = carnStartEnergy
+            self.cooldown = canStartCooldown
     
 
     def foodTypeVision(self):
@@ -574,5 +582,7 @@ class PomPom(object):
         food = random.choice([self.foodType, mate.foodType])
         pattern = random.choice([self.movePattern, mate.movePattern])
     
-        return PomPom(x, y, self.grid, pattern, food)
+        return PomPom(x, y, self.grid, pattern, food,
+                      self.herbStartEnergy, self.herbStartCooldown,
+                      self.carnStartEnergy, self.carnStartCooldown)
 
