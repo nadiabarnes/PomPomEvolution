@@ -9,8 +9,8 @@ class values():
     #world traits
     WIDTH = 70
     HEIGHT = 70
-    POM_NUMBER = 50
-    BUSH_NUMBER = 300
+    POM_DENSITY = .01 #percent of tiles that will be poms
+    BUSH_DENSITY = .1 #percent of tiles that will be bushes
     PERCENT_CARN = 0.1
     GAME_SPEED = 20
 
@@ -35,8 +35,14 @@ class values():
     CARN_START_COOLDOWN=200
     FLEE_TIME = 10
 
+    #PC
     PANEL_WIDTH = 200 
-    SCREEN_WIDTH = 700 + PANEL_WIDTH  # Fixed screen width (Simulation + Panel)
-    SCREEN_HEIGHT = 700  # Fixed screen height
+    SCREEN_WIDTH = 1000 + PANEL_WIDTH 
+    SCREEN_HEIGHT = 1000  # Fixed screen height
+
+    #laptop
+    #PANEL_WIDTH = 200 
+    #SCREEN_WIDTH = 700 + PANEL_WIDTH 
+    #SCREEN_HEIGHT = 700  # Fixed screen height
 
     CELLSIZE = min((SCREEN_WIDTH - PANEL_WIDTH) // WIDTH, SCREEN_HEIGHT // HEIGHT)  # Ensure grid fits
