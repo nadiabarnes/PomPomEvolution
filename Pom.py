@@ -3,16 +3,18 @@ import pygame
 import numpy
 import math
 from Food import Bush
+from config import values
 
 class PomPom(object):
     """
     This will track an individual pompom and it's behavior
     """
 
-    def __init__(self, x, y, grid, movePattern=None, foodType=None, herbVisionSize=3, carnVisionSize=7,
-                 herbStartEnergy=10, herbStartCooldown=40, carnStartEnergy=100, carnStartCooldown=200):
+    def __init__(self, x, y, grid, movePattern=None, foodType=None):
         #import the world grid
         self.grid = grid
+        self.width = values.WIDTH
+        self.height = values.HEIGHT
         #energy increases when food is eaten, decreases by 1 each turn
         self.energy = 20
         #What tiles the pom can see, changes direction as it moves
@@ -42,29 +44,21 @@ class PomPom(object):
         self.flee = 0
         #tiles surrounding the pom
         self.adjacentTiles = [None for _ in range(9)]
-        self.foodTypeSpecificSetup(herbStartEnergy, herbStartCooldown, 
-                                   carnStartEnergy, carnStartCooldown)
-        #save inital values from world
-        self.herbStartEnergy = herbStartEnergy
-        self.carnStartEnergy = carnStartEnergy
-        self.herbStartCooldown = herbStartCooldown
-        self.carnStartCooldown = carnStartCooldown
+        self.foodTypeSpecificSetup()
         #initiate vision and adjacency
-        self.herbSize = herbVisionSize
-        self.carnSize = carnVisionSize
+        self.herbSize = values.HERB_VISION_SIZE
+        self.carnSize = values.CARN_VISION_SIZE
         self.foodTypeVision()
-        self.updateAdjacentTiles(len(self.grid), len(self.grid))
-    
+        self.updateAdjacentTiles()
 
-    #TODO make these changable in simulate
-    def foodTypeSpecificSetup(self, herbStartEnergy, herbStartCooldown,
-                              carnStartEnergy, canStartCooldown):
+
+    def foodTypeSpecificSetup(self):
         if self.foodType == "herb":
-            self.energy = herbStartEnergy
-            self.cooldown = herbStartCooldown
+            self.energy = values.HERB_START_ENERGY
+            self.herbStartCooldown = values.HERB_START_COOLDOWN
         if self.foodType == "carn":
-            self.energy = carnStartEnergy
-            self.cooldown = canStartCooldown
+            self.energy = values.CARN_START_ENERGY
+            self.carnStartCooldown = values.CARN_START_COOLDOWN
     
 
     def foodTypeVision(self):
@@ -76,9 +70,7 @@ class PomPom(object):
             self.visionTilesUpdate(self.carnSize)
         
 
-    def update(self, grid, herbStartMate, herbEndMate, carnStartMate, carnEndMate,
-                carnDamage, herbEatEnergy, carnEatEnergy, carnEnergyCap, herbMateCooldown,
-                herbMateLoss, carnMateCooldown, carnMateLoss):
+    def update(self, grid):
         """
         Handles PomPom's behavior per turn
         """
@@ -88,37 +80,19 @@ class PomPom(object):
         if self.energy <= 0:
             return self.grid  # don't do anyhthing if dead
         
-        #herb/carnStart is the energy threshold to be horny
-        #herb/carnEnd is the energy threshold to be hungry
-        self.isMateReady(herbStart = herbStartMate, herbEnd = herbEndMate, 
-                         carnStart = carnStartMate, carnEnd = carnEndMate)
-
+        self.isMateReady()
         if self.flee > 0:
-            #flee time is how many turns they are frightened
-            self.runFromCarn(len(self.grid), len(self.grid), fleeTime=5)
-
+            self.runFromCarn()
         elif self.mateReady:
-            #herb/carnCooldown is how many turns until they can be horny again
-            #herb/carnLoss is energy loss for mating
-            self.findMate(len(self.grid), len(self.grid), herbCooldown = herbMateCooldown, 
-                          herbLoss = herbMateLoss, 
-                          carnCooldown = carnMateCooldown, carnLoss = carnMateLoss) 
-    
+            self.findMate() 
         else:
-            #carnDamage is the damage(energy loss) carns can deal per turn
-            #herb/carnEatValue is how much energy gained from eating
-            #carnEnergyCap is when carns stop hunting. Trust it's needed
-            self.findFood(len(self.grid), len(self.grid), carnDamage = carnDamage, 
-                          herbEatValue=herbEatEnergy, carnEatValue=carnEatEnergy, 
-                          carnEnergyCap=carnEnergyCap)
-        
-        self.updateAdjacentTiles(len(self.grid), len(self.grid))
+            self.findFood()
+        self.updateAdjacentTiles()
         self.foodTypeVision()
-
         return self.grid
     
 
-    def updateAdjacentTiles(self, width, height):
+    def updateAdjacentTiles(self):
         #TODO test this
         """
         Populates a list with the coordinates of the 8 tiles surrounding the PomPom.
@@ -130,11 +104,13 @@ class PomPom(object):
 
         for dx, dy in directions:
             new_x, new_y = self.rect.x + dx, self.rect.y + dy
-            if 0 <= new_x < width and 0 <= new_y < height:  # Ensure within bounds
+            if 0 <= new_x < self.width and 0 <= new_y < self.height:  # Ensure within bounds
                 self.adjacentTiles.append((new_x, new_y))
 
-
+    #BUG with vision, randomly increases to much larger in size
     def vision(self, size):
+        if size > max(values.HERB_VISION_SIZE, values.CARN_VISION_SIZE):
+            print("Something is terribly wrong: "+str(size))
         """
         Creates a rectangle that act's as the pompom's range of sight
         size is how long one edge of the pom pom's vision is
@@ -179,8 +155,8 @@ class PomPom(object):
         dx, dy = visCenterDirections[self.facing]
 
         # Get grid dimensions
-        grid_width = len(self.grid)
-        grid_height = len(self.grid[0]) if grid_width > 0 else 0
+        grid_width = self.width
+        grid_height = self.height if grid_width > 0 else 0
 
         # Top-left corner of the vision rectangle
         corner_x = self.rect.x + dx
@@ -216,20 +192,20 @@ class PomPom(object):
             self.facing = 'S'
 
 
-    def genericMove(self, width, height):
+    def genericMove(self):
         """
         moves the pompom determined by = it's heritable move pattern
         """
         if self.movePattern == "random":
-            self.randomMove(width, height)
+            self.randomMove()
         elif self.movePattern== "roomba":
-            self.moveForward(width,height)
+            self.moveForward()
         elif self.movePattern == "wander":
-            self.randomExtended(width, height)
+            self.randomExtended()
         else: pass
 
     
-    def randomExtended(self, width, height):
+    def randomExtended(self):
         """
         Move 3-10 steps then turn a random direction.
         """
@@ -248,13 +224,13 @@ class PomPom(object):
             self.turnCount -= 1
         new_rect = self.rect.move(dx, dy)
         # Ensure movement stays within bounds
-        if 0 <= new_rect.x < width and 0 <= new_rect.y < height:
+        if 0 <= new_rect.x < self.width and 0 <= new_rect.y < self.height:
             self.rect = new_rect
         else:
-            self.randomMove(width, height)
+            self.randomMove()
     
 
-    def randomMove(self, width, height):
+    def randomMove(self):
         """
         aka "random"
         Moves the PomPom towards food (if found), or makes a random move if no food is visible.
@@ -270,13 +246,13 @@ class PomPom(object):
         self.facing = facing  # Store the chosen direction #TODO use self.updateFacing
         new_rect = self.rect.move(dx, dy)
         # Ensure movement stays within bounds
-        if 0 <= new_rect.x < width and 0 <= new_rect.y < height:
+        if 0 <= new_rect.x < self.width and 0 <= new_rect.y < self.height:
             self.rect = new_rect
         else:
-            self.randomMove(width, height)
+            self.randomMove()
     
 
-    def moveForward(self, width, height):
+    def moveForward(self):
         """
         aka "roomba"
         Roomba Style Movement. move in direction pom is facing,
@@ -290,13 +266,13 @@ class PomPom(object):
         (dx, dy) = moveChoice
         new_rect = self.rect.move(dx, dy)
         # Ensure movement stays within bounds
-        if 0 <= new_rect.x < width and 0 <= new_rect.y < height:
+        if 0 <= new_rect.x < self.width and 0 <= new_rect.y < self.height:
             self.rect = new_rect
         else:
-            self.randomMove(width, height)
+            self.randomMove()
     
     #TODO test this
-    def runFromCarn(self, width, height, fleeTime):
+    def runFromCarn(self):
         """
         herbs move away from carns if they see them
         """
@@ -319,7 +295,7 @@ class PomPom(object):
 
         if closest_pom:
             #if there is a carn, move away from it in one direction for x rounds
-            self.flee = fleeTime
+            self.flee = values.FLEE_TIME
             #only do something if you see a carn
             pomx, pomy = closest_pom.rect.x, closest_pom.rect.y  # Closest poms's coordinates
 
@@ -333,30 +309,31 @@ class PomPom(object):
 
             # Move the PomPom
             new_rect = self.rect.move(dx, dy)
-            if 0 <= new_rect.x < width and 0 <= new_rect.y < height:
+            if 0 <= new_rect.x < self.width and 0 <= new_rect.y < self.height:
                 self.updateFacing(self.rect.x, self.rect.y, new_rect.x, new_rect.y)
                 self.rect = new_rect
         else:
-            self.moveForward(width, height)
+            self.moveForward()
 
 
-    def findFood(self, width, height, carnDamage, carnEatValue, herbEatValue, carnEnergyCap):
+    def findFood(self):
         if self.foodType == "herb":
-            self.seekBushes(width, height, herbEatValue)
+            self.seekBushes()
         elif self.foodType == "omnivore":
-            self.seekBushes(width, height, herbEatValue)
+            self.seekBushes()
         elif self.foodType == "carn":
-            self.seekPomPoms(width, height, carnDamage, carnEatValue, carnEnergyCap)
+            self.seekPomPoms()
     
 
-    def seekPomPoms(self, width, height, carnDamage, carnEatValue, carnEnergyCap):
+    def seekPomPoms(self):
         """
         carns look for pompoms to eat
         only hunts other carns if no herbs available
         if they have energy over cap, generic move
         """
-        if self.energy > carnEnergyCap:
-            self.genericMove(width, height)
+        if self.energy > values.CARN_ENERGY_CAP:
+            #if you have enough energy, only move around
+            self.genericMove()
             return
         closest_pom = None
         min_distance = float('inf')
@@ -381,9 +358,9 @@ class PomPom(object):
             # If the pom is adjacent, stay still, pom, and enter cooldown
             if (pomx, pomy) in self.adjacentTiles:
                 dx, dy = 0, 0
-                closest_pom.takeDamage(carnDamage)
+                closest_pom.takeDamage(values.CARN_DAMAGE)
                 if closest_pom.energy <= 0:
-                    self.eat(carnEatValue = carnEatValue)
+                    self.eat()
                 return  # Exit function after mating
 
             # Move towards the pom if not adjacent
@@ -397,16 +374,16 @@ class PomPom(object):
 
             # Move the PomPom
             new_rect = self.rect.move(dx, dy)
-            if 0 <= new_rect.x < width and 0 <= new_rect.y < height:
+            if 0 <= new_rect.x < self.width and 0 <= new_rect.y < self.height:
                 self.updateFacing(self.rect.x, self.rect.y, new_rect.x, new_rect.y)
                 self.rect = new_rect
             else:
-                self.genericMove(width, height)  # If pathfinding leads outside, move randomly
+                self.genericMove()  # If pathfinding leads outside, move randomly
         else:
-            self.genericMove(width, height)  # If no pom is found, move randomly
+            self.genericMove()  # If no pom is found, move randomly
 
 
-    def seekBushes(self, width, height, herbEatValue):
+    def seekBushes(self):
         """
         herb pompoms move towards bushes
         If bush isn't in sight, then do generic move
@@ -429,7 +406,7 @@ class PomPom(object):
         if closest_bush:
             if self.rect.x == closest_bush.rect.x and self.rect.y == closest_bush.rect.y and closest_bush.cooldown == 0:
                 #if on top of closest bush, eat it
-                self.eat(herbEatValue = herbEatValue)  # Gain energy from eating
+                self.eat()  # Gain energy from eating
                 closest_bush.eaten()
                 return
             else:
@@ -446,23 +423,23 @@ class PomPom(object):
 
                 # Move the PomPom
                 new_rect = self.rect.move(dx, dy)
-                if 0 <= new_rect.x < width and 0 <= new_rect.y < height:
+                if 0 <= new_rect.x < self.width and 0 <= new_rect.y < self.height:
                     self.updateFacing(self.rect.x, self.rect.y, new_rect.x, new_rect.y)
                     self.rect = new_rect
                 else:
-                    self.genericMove(width, height)  # If pathfinding leads outside, move randomly
+                    self.genericMove()  # If pathfinding leads outside, move randomly
         else:
-            self.genericMove(width, height)  # If no bush found, move randomly
+            self.genericMove()  # If no bush found, move randomly
     
 
-    def eat(self, herbEatValue = 10, carnEatValue = 50):
+    def eat(self):
         """
         when the pom encounters food, increase it's energy
         """
         if self.foodType == "herb":
-            self.energy = self.energy + herbEatValue
+            self.energy = self.energy + values.HERB_EAT_ENERGY
         if self.foodType == "carn":
-            self.energy = self.energy + carnEatValue
+            self.energy = self.energy + values.CARN_EAT_ENERGY
     
     
     def takeDamage(self, damage):
@@ -472,20 +449,20 @@ class PomPom(object):
         self.energy = self.energy - damage
 
 
-    def isMateReady(self, herbStart, herbEnd, carnStart, carnEnd):
+    def isMateReady(self):
         if self.foodType == "herb":
-            if self.energy > herbStart:
+            if self.energy > values.HERB_START_MATE:
                 self.mateReady = True
-            if self.energy < herbEnd or self.cooldown > 0:
+            if self.energy < values.HERB_END_MATE or self.cooldown > 0:
                 self.mateReady = False
         elif self.foodType == "carn":
-            if self.energy > carnStart:
+            if self.energy > values.CARN_START_MATE:
                 self.mateReady = True
-            if self.energy < carnEnd or self.cooldown > 0:
+            if self.energy < values.CARN_END_MATE or self.cooldown > 0:
                 self.mateReady = False
 
 
-    def findMate(self, width, height, herbCooldown, herbLoss, carnCooldown, carnLoss):
+    def findMate(self):
         """
         If the PomPom has enough energy, try to reproduce
         """
@@ -511,8 +488,8 @@ class PomPom(object):
             # If the mate is adjacent, stay still, mate, and enter cooldown
             if (pomx, pomy) in self.adjacentTiles:
                 dx, dy = 0, 0
-                self.successfulMate(closest_pom, herbCooldown, herbLoss, carnCooldown, carnLoss)
-                closest_pom.gotMated(herbCooldown, herbLoss, carnCooldown, carnLoss)
+                self.successfulMate(closest_pom)
+                closest_pom.gotMated()
                 return  # Exit function after mating
 
             # Move towards the mate if not adjacent
@@ -526,35 +503,35 @@ class PomPom(object):
 
             # Move the PomPom
             new_rect = self.rect.move(dx, dy)
-            if 0 <= new_rect.x < width and 0 <= new_rect.y < height:
+            if 0 <= new_rect.x < self.width and 0 <= new_rect.y < self.height:
                 self.updateFacing(self.rect.x, self.rect.y, new_rect.x, new_rect.y)
                 self.rect = new_rect
             else:
-                self.genericMove(width, height)  # If pathfinding leads outside, move randomly
+                self.genericMove()  # If pathfinding leads outside, move randomly
         else:
-            self.genericMove(width, height)  # If no mate is found, move randomly
+            self.genericMove()  # If no mate is found, move randomly
 
 
-    def successfulMate(self, mate, herbCooldown, herbLoss, carnCooldown, carnLoss):
+    def successfulMate(self, mate):
         if self.foodType == "herb":
-            self.energy -= herbLoss  # Reduce energy
-            self.cooldown = herbCooldown
+            self.energy -= values.HERB_MATE_LOSS  # Reduce energy
+            self.cooldown = values.HERB_MATE_COOLDOWN
         if self.foodType == "carn":
-            self.energy -= carnLoss
-            self.cooldown = carnCooldown
+            self.energy -= values.CARN_MATE_LOSS
+            self.cooldown = values.CARN_MATE_COOLDOWN
         self.spawnBabies(mate)
 
 
-    def gotMated(self, herbCooldown, herbLoss, carnCooldown, carnLoss):
+    def gotMated(self):
         """
         when a different pompom mates with you, you still loose then energy and cooldown
         """
         if self.foodType == "herb":
-            self.energy -= herbLoss  # Reduce energy
-            self.cooldown = herbCooldown
+            self.energy -= values.HERB_MATE_LOSS  # Reduce energy
+            self.cooldown = values.HERB_MATE_COOLDOWN
         if self.foodType == "carn":
-            self.energy -= carnLoss
-            self.cooldown = carnCooldown
+            self.energy -= values.CARN_MATE_LOSS
+            self.cooldown = values.CARN_MATE_COOLDOWN
 
 
     def spawnBabies(self, mate):
@@ -582,7 +559,5 @@ class PomPom(object):
         food = random.choice([self.foodType, mate.foodType])
         pattern = random.choice([self.movePattern, mate.movePattern])
     
-        return PomPom(x, y, self.grid, pattern, food,
-                      self.herbStartEnergy, self.herbStartCooldown,
-                      self.carnStartEnergy, self.carnStartCooldown)
+        return PomPom(x, y, self.grid, pattern, food)
 

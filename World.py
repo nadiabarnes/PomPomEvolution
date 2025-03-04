@@ -2,70 +2,44 @@ from Pom import PomPom
 from Food import Bush
 import random
 import pygame
+from config import values
 
 
 class PomPomWorld:
     """
     This will handle the board/world for PomPomEvolution
     """
-    def __init__(self, width=20, height=20, cell_size=20, pomNumber=2, bushNumber=20, percentcarn=.2, 
-                 herbStartMate = 50, herbEndMate = 39, carnStartMate = 120, carnEndMate = 70, 
-                 carnDamage = 50, herbEatEnergy = 10, carnEatEnergy = 50, carnEnergyCap = 300, 
-                 herbMateCooldown = 20, herbMateLoss = 30, carnMateCooldown = 40, carnMateLoss=20,
-                 herbVisionSize = 3, carnVisionSize = 7, herbStartEnergy=10, herbStartCooldown=40, 
-                 carnStartEnergy=100, carnStartCooldown=200):
+    def __init__(self):
         """
         Board variables
         """
-        self.width = width  # Grid width
-        self.height = height  # Grid height
-        self.cell_size = cell_size  # Pop-up window size
-        self.grid = [[None for _ in range(height)] for _ in range(width)]  # Creates an empty grid
+        self.width = values.WIDTH  # Grid width
+        self.height = values.HEIGHT  # Grid height
+        self.cell_size = values.CELLSIZE  # Pop-up window size
+        self.grid = [[None for _ in range(values.HEIGHT)] for _ in range(values.WIDTH)]  # Creates an empty grid
         self.bushes = []
         self.pompoms = [] 
         self.epoch = 0
 
-        self.herbStartMate = herbStartMate
-        self.herbEndMate = herbEndMate
-        self.carnStartMate = carnStartMate
-        self.carnEndMate = carnEndMate
-        self.carnDamage = carnDamage
-        self.herbEatEnergy = herbEatEnergy
-        self.carnEatEnergy = carnEatEnergy
-        self.carnEnergyCap = carnEnergyCap
-        self.herbMateCooldown = herbMateCooldown
-        self.herbMateLoss = herbMateLoss
-        self.carnMateCooldown = carnMateCooldown
-        self.carnMateLoss = carnMateLoss
-        self.herbVisionSize = herbVisionSize
-        self.carnVisionSize = carnVisionSize
-        self.herbStartEnergy = herbStartEnergy
-        self.herbStartCooldown = herbStartCooldown
-        self.carnStartEnergy = carnStartEnergy
-        self.carnStartCooldown = carnStartCooldown
-
         # Define probabilities for food types
-        foodTypeWeights = {"herb": 1 - percentcarn, "carn": percentcarn}
+        foodTypeWeights = {"herb": 1 - values.PERCENT_CARN, "carn": values.PERCENT_CARN}
 
         #TODO ensure that the pom/bush is always placed
 
         # Spawn in PomPoms
-        for _ in range(pomNumber):  # Rough number of starting PomPoms
-            x, y = random.randint(0, width - 1), random.randint(0, height - 1)
+        for _ in range(values.POM_NUMBER):  # Rough number of starting PomPoms
+            x, y = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
             if not self.grid[x][y]:
                 food = random.choices(list(foodTypeWeights.keys()), weights=foodTypeWeights.values())[0]
                 pattern = random.choice(["random", "roomba", "wander"])
-                newPom = PomPom(x, y, self.grid, pattern, food, herbVisionSize=self.herbVisionSize, 
-                                carnVisionSize=self.carnVisionSize, herbStartEnergy = self.herbStartEnergy,
-                                herbStartCooldown=self.herbStartCooldown, carnStartEnergy=self.carnStartEnergy,
-                                carnStartCooldown=self.carnStartCooldown)
+                newPom = PomPom(x, y, self.grid, pattern, food)
 
                 self.grid[x][y] = newPom
                 self.pompoms.append(self.grid[x][y])
 
         # Spawn in bushes
-        for _ in range(int(bushNumber)):  # Rough starting number of bushes
-            x, y = random.randint(0, width - 1), random.randint(0, height - 1)
+        for _ in range(int(values.BUSH_NUMBER)):  # Rough starting number of bushes
+            x, y = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
             if not self.grid[x][y]:
                 self.grid[x][y] = Bush(x, y, self.grid)
                 self.bushes.append(self.grid[x][y])
@@ -108,10 +82,7 @@ class PomPomWorld:
         new_pompoms = []  # To store PomPoms that are still alive
 
         for pompom in self.pompoms:
-            pompom.update(self.grid, self.herbStartMate, self.herbEndMate, self.carnStartMate, 
-                          self.carnEndMate, self.carnDamage, self.herbEatEnergy, self.carnEatEnergy,
-                          self.carnEnergyCap, self.herbMateCooldown, self.herbMateLoss, 
-                          self.carnMateCooldown, self.carnMateLoss)  # Update PomPom behavior
+            pompom.update(self.grid)  # Update PomPom behavior
 
             if pompom.energy <= 0:  # If it dies, don't add to the new grid
                 continue  # Skip dead PomPom

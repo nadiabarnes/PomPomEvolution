@@ -1,6 +1,7 @@
 from World import PomPomWorld
 from Pom import PomPom
 import pygame
+from config import values
 
 class Visualize:
     """
@@ -8,39 +9,24 @@ class Visualize:
     """
     def __init__(self, world):
         self.world = world
+  
 
-    def drawOLD(self, screen):
-        """
-        updates the screen
-        """
-        screen.fill((21, 60, 74))  #Background Color
-        font = pygame.font.Font(None, self.world.cell_size - 2)  #Create a font, size slightly smaller than cell
-        text_color = (0, 0, 0)
-
-        #self.drawVisableTiles(screen)
-        self.drawBushes(screen, self.world)
-        self.drawPomPomsFoodtype(screen,font,text_color, self.world)
-        self.drawEpochCount(screen, font, self.world)
-        self.drawPomPomFoodTypeMetrics(screen, font, self.world)
-
-        pygame.display.flip() #update the screen
-    
-
-    def draw(self, screen, panel_width):
+    def draw(self, screen):
         """
         Updates the screen, including the simulation and statistics panel.
         """
         screen.fill((21, 60, 74))  #Background Color for Simulation
-        font = pygame.font.Font(None, self.world.cell_size - 2)  # Font for statistics
+        font = pygame.font.Font(None, self.world.cell_size - 2)  #font for pompoms
         text_color = (0, 0, 0)  # black text
 
         # Draw the simulation area (left side)
+        self.drawVisableTiles(screen, self.world)
         self.drawBushes(screen, self.world)
         self.drawPomPomsFoodtype(screen, font, text_color, self.world)
         
         # Draw the right-side panel
         panel_x = self.world.width * self.world.cell_size  # Start drawing after the simulation grid
-        pygame.draw.rect(screen, (50, 0, 20), (panel_x, 0, panel_width, screen.get_height()))  #black panel
+        pygame.draw.rect(screen, (50, 0, 20), (panel_x, 0, values.PANEL_WIDTH, screen.get_height()))  #black panel
 
         self.drawStatisticsPanel(screen, panel_x)
 
@@ -60,6 +46,7 @@ class Visualize:
         screen.blit(title_text, (panel_x + padding, y_offset))
         y_offset += 40
 
+        #TODO better efficiency
         # Display PomPom Counts
         living_pompoms = len([pompom for pompom in self.world.pompoms if pompom.energy > 0])
         carn_pompoms = len([pompom for pompom in self.world.pompoms if pompom.energy > 0 and pompom.foodType == "carn"])
