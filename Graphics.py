@@ -2,6 +2,7 @@ from World import PomPomWorld
 from Pom import PomPom
 import pygame
 from config import values
+from BodyBits import *
 
 class Visualize:
     """
@@ -23,6 +24,7 @@ class Visualize:
         #self.drawVisableTiles(screen, self.world)
         self.drawBushes(screen, self.world)
         self.drawPomPomsFoodtype(screen, font, text_color, self.world)
+        self.drawBodyBits(screen, self.world)
         
         # Draw the right-side panel
         panel_x = self.world.width * self.world.cell_size  # Start drawing after the simulation grid
@@ -219,4 +221,45 @@ class Visualize:
                             2
                         )
 
-                        
+    def drawBodyBits(self, screen, world):
+        """Draws the body bits of each PomPom in the world with different colors based on their type."""
+        
+        for pompom in world.pompoms:
+            if pompom.energy <= 0:  # Skip dead pompoms
+                continue
+
+            body_bit_positions = pompom.calcBodyBitTiles()
+
+            # Mapping body bit types to colors
+            body_bit_colors = {
+                "spike": (255, 0, 0),   # Red
+                "eyeball": (0, 0, 255),  # Blue
+                "shield": (128, 128, 128)  # Gray
+            }
+
+            # Get the size of each cell
+            cell_size = world.cell_size
+
+            # Iterate through body bits and draw them
+            for bit_name, position in body_bit_positions.items():
+                x, y = position
+
+                # Get the corresponding body bit object
+                body_bit = getattr(pompom, bit_name)
+
+                if isinstance(body_bit, spike):
+                    color = body_bit_colors["spike"]
+                elif isinstance(body_bit, eyeball):
+                    color = body_bit_colors["eyeball"]
+                elif isinstance(body_bit, shield):
+                    color = body_bit_colors["shield"]
+                else:
+                    continue  # Skip if no valid body bit
+
+                pygame.draw.rect(
+                    screen,
+                    color,
+                    (x * cell_size, y * cell_size, cell_size, cell_size)
+                )
+
+                            

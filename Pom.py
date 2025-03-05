@@ -1,16 +1,17 @@
 import random
 import pygame
 import numpy
-import math
 from Food import Bush
 from config import values
+from BodyBits import *
 
 class PomPom(object):
     """
     This will track an individual pompom and it's behavior
     """
 
-    def __init__(self, x, y, grid, movePattern=None, foodType=None):
+    def __init__(self, x, y, grid, movePattern=None, foodType=None, bodyBit1 = None,
+                 bodyBit2 = None, bodyBit3 = None, bodyBit4 = None):
         #import the world grid
         self.grid = grid
         self.width = values.WIDTH
@@ -18,6 +19,15 @@ class PomPom(object):
         #energy increases when food is eaten, decreases by 1 each turn
         self.age = 0
         self.energy = 20
+        #Initiate body bits
+        if bodyBit1 == None:
+            self.bodyBit1 = self.randomizeBodyBit()
+        if bodyBit2 == None:
+            self.bodyBit2 = self.randomizeBodyBit()
+        if bodyBit3 == None:
+            self.bodyBit3 = self.randomizeBodyBit()
+        if bodyBit4 == None:
+            self.bodyBit4 = self.randomizeBodyBit()
         #What tiles the pom can see, changes direction as it moves
         directions = ['N','E','S','W']
         self.facing = random.choice(directions)
@@ -25,6 +35,7 @@ class PomPom(object):
         self.visableTiles = []
         #the pom's tile
         self.rect = pygame.Rect(x, y, 1, 1)
+        #set the body bits
         #set the pom's generic move pattern
         if movePattern == None:
             movePatterns = ["random", "roomba", "wander"] 
@@ -51,6 +62,18 @@ class PomPom(object):
         self.carnSize = values.CARN_VISION_SIZE
         self.foodTypeVision()
         self.updateAdjacentTiles()
+
+
+
+    def randomizeBodyBit(self):
+        temp = random.randint(1,3)
+        if temp == 1:
+            bodyBit = spike()
+        elif temp == 2:
+            bodyBit = eyeball()
+        elif temp == 3:
+            bodyBit = shield()
+        return bodyBit
 
 
     def foodTypeSpecificSetup(self):
@@ -109,7 +132,31 @@ class PomPom(object):
             if 0 <= new_x < self.width and 0 <= new_y < self.height:  # Ensure within bounds
                 self.adjacentTiles.append((new_x, new_y))
 
-    #BUG with vision, randomly increases to much larger in size
+
+    def calcBodyBitTiles(self):
+        """
+        Returns a dictionary with coordinates of each body bit relative to the pom's position.
+        """
+        x, y = self.rect.x, self.rect.y  # Get pom's current position
+        # Define coordinate shifts for each direction
+        direction_offsets = {
+            'N': [(0, -1), (1, 0), (0, 1), (-1, 0)],  # Front, right, back, left
+            'E': [(1, 0), (0, 1), (-1, 0), (0, -1)],  # Front, right, back, left
+            'S': [(0, 1), (-1, 0), (0, -1), (1, 0)],  # Front, right, back, left
+            'W': [(-1, 0), (0, -1), (1, 0), (0, 1)]   # Front, right, back, left
+        }
+        # Get the correct offsets for the current facing direction
+        offsets = direction_offsets[self.facing]
+        # Create a dictionary of body bit positions
+        body_bit_positions = {
+            "bodyBit1": (x + offsets[0][0], y + offsets[0][1]),  # Front
+            "bodyBit2": (x + offsets[1][0], y + offsets[1][1]),  # Right
+            "bodyBit3": (x + offsets[2][0], y + offsets[2][1]),  # Back
+            "bodyBit4": (x + offsets[3][0], y + offsets[3][1])   # Left
+        }
+        return body_bit_positions
+
+
     def vision(self, size):
         if size > max(values.HERB_VISION_SIZE, values.CARN_VISION_SIZE):
             print("Something is terribly wrong: "+str(size))

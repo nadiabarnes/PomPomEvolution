@@ -12,7 +12,7 @@ class values():
     POM_DENSITY = .005 #percent of tiles that will be poms
     BUSH_DENSITY = .05 #percent of tiles that will be bushes
     PERCENT_CARN = 0.2
-    GAME_SPEED = 40
+    GAME_SPEED = 4
 
     #pompom traits
     HERB_START_MATE = 600 #nrg min to be horny
