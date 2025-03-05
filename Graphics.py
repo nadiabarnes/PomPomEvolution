@@ -46,14 +46,26 @@ class Visualize:
         screen.blit(title_text, (panel_x + padding, y_offset))
         y_offset += 40
 
-        #TODO better efficiency
-        # Display PomPom Counts
-        living_pompoms = len([pompom for pompom in self.world.pompoms if pompom.energy > 0])
-        carn_pompoms = len([pompom for pompom in self.world.pompoms if pompom.energy > 0 and pompom.foodType == "carn"])
-        herb_pompoms = len([pompom for pompom in self.world.pompoms if pompom.energy > 0 and pompom.foodType == "herb"])
-        random_poms = len([pompom for pompom in self.world.pompoms if pompom.energy > 0 and pompom.movePattern == "random"])
-        roomba_poms = len([pompom for pompom in self.world.pompoms if pompom.energy > 0 and pompom.movePattern == "roomba"])
-        wander_poms = len([pompom for pompom in self.world.pompoms if pompom.energy > 0 and pompom.movePattern == "wander"])
+        living_pompoms = 0
+        carn_pompoms = 0
+        herb_pompoms = 0
+        random_poms = 0
+        roomba_poms = 0
+        wander_poms = 0
+
+        for pompom in self.world.pompoms:
+            if pompom.energy > 0:
+                living_pompoms += 1
+            if pompom.energy > 0 and pompom.foodType == "carn":
+                carn_pompoms += 1
+            if pompom.energy > 0 and pompom.foodType == "herb":
+                herb_pompoms += 1
+            if pompom.energy > 0 and pompom.movePattern == "random":
+                random_poms += 1
+            if pompom.energy > 0 and pompom.movePattern == "roomba":
+                roomba_poms += 1
+            if pompom.energy > 0 and pompom.movePattern == "wander":
+                wander_poms += 1
 
         stats = [
             f"Epoch: {self.world.epoch}",
@@ -62,7 +74,8 @@ class Visualize:
             f"Herbs: {herb_pompoms}",
             f"Random Movers: {random_poms}",
             f"Roomba Movers: {roomba_poms}",
-            f"Wander Movers: {wander_poms}"
+            f"Wander Movers: {wander_poms}",
+            f"pomlist: {len(self.world.pompoms)}"
         ]
 
         # Display each stat

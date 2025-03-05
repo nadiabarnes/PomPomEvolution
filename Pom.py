@@ -16,6 +16,7 @@ class PomPom(object):
         self.width = values.WIDTH
         self.height = values.HEIGHT
         #energy increases when food is eaten, decreases by 1 each turn
+        self.age = 0
         self.energy = 20
         #What tiles the pom can see, changes direction as it moves
         directions = ['N','E','S','W']
@@ -75,6 +76,7 @@ class PomPom(object):
         Handles PomPom's behavior per turn
         """
         self.grid = grid #match pom's grid to current grid
+        self.age += 1
         self.energy -= 1  # Loses energy each turn
         self.cooldown -= 1
         if self.energy <= 0:
