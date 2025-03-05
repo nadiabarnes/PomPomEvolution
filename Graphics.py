@@ -21,7 +21,7 @@ class Visualize:
         text_color = (0, 0, 0)  # black text
 
         # Draw the simulation area (left side)
-        #self.drawVisableTiles(screen, self.world)
+        self.drawVisableTiles(screen, self.world)
         self.drawBushes(screen, self.world)
         self.drawPomPomsFoodtype(screen, font, text_color, self.world)
         self.drawBodyBits(screen, self.world)
@@ -220,6 +220,7 @@ class Visualize:
                             ),
                             2
                         )
+
 
     def drawBodyBits(self, screen, world):
         """Draws the body bits of each PomPom in the world with different colors based on their type."""

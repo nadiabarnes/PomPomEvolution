@@ -132,7 +132,7 @@ class PomPom(object):
             if 0 <= new_x < self.width and 0 <= new_y < self.height:  # Ensure within bounds
                 self.adjacentTiles.append((new_x, new_y))
 
-
+    #TODO not working correct
     def calcBodyBitTiles(self):
         """
         Returns a dictionary with coordinates of each body bit relative to the pom's position.
