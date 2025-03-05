@@ -114,6 +114,7 @@ class PomPom(object):
             self.findFood()
         self.updateAdjacentTiles()
         self.foodTypeVision()
+        self.bodyBitInteraction()
         return self.grid
     
 
@@ -132,7 +133,7 @@ class PomPom(object):
             if 0 <= new_x < self.width and 0 <= new_y < self.height:  # Ensure within bounds
                 self.adjacentTiles.append((new_x, new_y))
 
-    #TODO not working correct
+    #TODO make sure bits are on correct tiles
     def calcBodyBitTiles(self):
         """
         Returns a dictionary with coordinates of each body bit relative to the pom's position.
@@ -141,9 +142,9 @@ class PomPom(object):
         # Define coordinate shifts for each direction
         direction_offsets = {
             'N': [(0, -1), (1, 0), (0, 1), (-1, 0)],  # Front, right, back, left
-            'E': [(1, 0), (0, 1), (-1, 0), (0, -1)],  # Front, right, back, left
+            'W': [(1, 0), (0, 1), (-1, 0), (0, -1)],  # Front, right, back, left
             'S': [(0, 1), (-1, 0), (0, -1), (1, 0)],  # Front, right, back, left
-            'W': [(-1, 0), (0, -1), (1, 0), (0, 1)]   # Front, right, back, left
+            'E': [(-1, 0), (0, -1), (1, 0), (0, 1)]   # Front, right, back, left
         }
         # Get the correct offsets for the current facing direction
         offsets = direction_offsets[self.facing]
@@ -155,6 +156,29 @@ class PomPom(object):
             "bodyBit4": (x + offsets[3][0], y + offsets[3][1])   # Left
         }
         return body_bit_positions
+
+
+    def bodyBitInteraction(self):
+        positionsList = self.calcBodyBitTiles()
+
+        for bitName, position in positionsList.items():
+            x, y = position
+            bodyBit = None
+            if self.isValid((x,y)): 
+                if isinstance(self.grid[x][y], PomPom):
+                    pom = self.grid[x][y]
+                    if bitName == "bodyBit1":
+                        bodyBit = self.bodyBit1
+                        bodyBit.collision(pom)
+                    if bitName == "bodyBit2":
+                        bodyBit = self.bodyBit2
+                        bodyBit.collision(pom)
+                    if bitName == "bodyBit3":
+                        bodyBit = self.bodyBit3
+                        bodyBit.collision(pom)
+                    if bitName == "bodyBit4":
+                        bodyBit = self.bodyBit4
+                        bodyBit.collision(pom)
 
 
     def vision(self, size):

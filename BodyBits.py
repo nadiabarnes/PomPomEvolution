@@ -1,13 +1,13 @@
 import pygame
 
 class spike:
-    def collision():
+    def collision(self):
         pass
 
 class eyeball:
-    def collision():
+    def collision(self):
         pass
 
 class shield:
-    def collision():
+    def collision(self):
         pass

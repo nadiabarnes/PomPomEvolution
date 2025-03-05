@@ -37,13 +37,13 @@ class values():
     BUSH_COOLDOWN = 100
 
     #PC
-    PANEL_WIDTH = 200 
-    SCREEN_WIDTH = 1000 + PANEL_WIDTH 
-    SCREEN_HEIGHT = 1000  # Fixed screen height
+    #PANEL_WIDTH = 200 
+    #SCREEN_WIDTH = 1000 + PANEL_WIDTH 
+    #SCREEN_HEIGHT = 1000  # Fixed screen height
 
     #laptop
-    #PANEL_WIDTH = 200 
-    #SCREEN_WIDTH = 700 + PANEL_WIDTH 
-    #SCREEN_HEIGHT = 700  # Fixed screen height
+    PANEL_WIDTH = 200 
+    SCREEN_WIDTH = 700 + PANEL_WIDTH 
+    SCREEN_HEIGHT = 700  # Fixed screen height
 
     CELLSIZE = min((SCREEN_WIDTH - PANEL_WIDTH) // WIDTH, SCREEN_HEIGHT // HEIGHT)  # Ensure grid fits
