@@ -1,4 +1,5 @@
 import pygame
+from config import values
 
 class Bush:
     
@@ -10,7 +11,7 @@ class Bush:
         
     def eaten(self):
         """ PomPom eats the bush, triggering cooldown. """
-        self.cooldown = 10  # Goes on a 5-turn cooldown
+        self.cooldown = values.BUSH_COOLDOWN  # Goes on a 5-turn cooldown
 
     def update(self, grid):
         """ Regenerates after cooldown expires. """

@@ -24,25 +24,24 @@ class PomPomWorld:
         # Define probabilities for food types
         foodTypeWeights = {"herb": 1 - values.PERCENT_CARN, "carn": values.PERCENT_CARN}
 
-        #TODO ensure that the pom/bush is always placed
-
-        # Spawn in PomPoms
-        for _ in range(values.POM_NUMBER):  # Rough number of starting PomPoms
-            x, y = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
-            if not self.grid[x][y]:
-                food = random.choices(list(foodTypeWeights.keys()), weights=foodTypeWeights.values())[0]
-                pattern = random.choice(["random", "roomba", "wander"])
-                newPom = PomPom(x, y, self.grid, pattern, food)
-
-                self.grid[x][y] = newPom
-                self.pompoms.append(self.grid[x][y])
+        #spawn in pompoms
+        for x in range(self.width):
+                for y in range(self.height):
+                    temp = random.random()
+                    if temp < values.POM_DENSITY:
+                        food = random.choices(list(foodTypeWeights.keys()), weights=foodTypeWeights.values())[0]
+                        pattern = random.choice(["random", "roomba", "wander"])
+                        newPom = PomPom(x, y, self.grid, pattern, food)
+                        self.grid[x][y] = newPom
+                        self.pompoms.append(self.grid[x][y])
 
         # Spawn in bushes
-        for _ in range(int(values.BUSH_NUMBER)):  # Rough starting number of bushes
-            x, y = random.randint(0, self.width - 1), random.randint(0, self.height - 1)
-            if not self.grid[x][y]:
-                self.grid[x][y] = Bush(x, y, self.grid)
-                self.bushes.append(self.grid[x][y])
+        for x in range(self.width):
+                for y in range(self.height):
+                    temp = random.random()
+                    if temp < values.BUSH_DENSITY:
+                        self.grid[x][y] = Bush(x, y, self.grid)
+                        self.bushes.append(self.grid[x][y])
 
 
     def update(self):
@@ -66,7 +65,6 @@ class PomPomWorld:
             active = True
         else: active = False
         return active
-
 
 
     def updateFood(self):

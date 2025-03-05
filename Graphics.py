@@ -2,6 +2,7 @@ from World import PomPomWorld
 from Pom import PomPom
 import pygame
 from config import values
+from BodyBits import *
 
 class Visualize:
     """
@@ -23,6 +24,7 @@ class Visualize:
         self.drawVisableTiles(screen, self.world)
         self.drawBushes(screen, self.world)
         self.drawPomPomsFoodtype(screen, font, text_color, self.world)
+        self.drawBodyBits(screen, self.world)
         
         # Draw the right-side panel
         panel_x = self.world.width * self.world.cell_size  # Start drawing after the simulation grid
@@ -46,22 +48,26 @@ class Visualize:
         screen.blit(title_text, (panel_x + padding, y_offset))
         y_offset += 40
 
-        living_pompoms, carn_pompoms, herb_pompoms = 0, 0, 0
-        roomba_poms, random_poms, wander_poms = 0, 0, 0
+        living_pompoms = 0
+        carn_pompoms = 0
+        herb_pompoms = 0
+        random_poms = 0
+        roomba_poms = 0
+        wander_poms = 0
 
         for pompom in self.world.pompoms:
-            if pompom.energy>0:
-                living_pompoms+=1
+            if pompom.energy > 0:
+                living_pompoms += 1
             if pompom.energy > 0 and pompom.foodType == "carn":
-                carn_pompoms+=1
+                carn_pompoms += 1
             if pompom.energy > 0 and pompom.foodType == "herb":
-                herb_pompoms+=1
+                herb_pompoms += 1
             if pompom.energy > 0 and pompom.movePattern == "random":
-                random_poms+=1
+                random_poms += 1
             if pompom.energy > 0 and pompom.movePattern == "roomba":
-                roomba_poms+=1
+                roomba_poms += 1
             if pompom.energy > 0 and pompom.movePattern == "wander":
-                wander_poms+=1
+                wander_poms += 1
 
         stats = [
             f"Epoch: {self.world.epoch}",
@@ -70,7 +76,8 @@ class Visualize:
             f"Herbs: {herb_pompoms}",
             f"Random Movers: {random_poms}",
             f"Roomba Movers: {roomba_poms}",
-            f"Wander Movers: {wander_poms}"
+            f"Wander Movers: {wander_poms}",
+            f"pomlist: {len(self.world.pompoms)}"
         ]
 
         # Display each stat
@@ -215,28 +222,45 @@ class Visualize:
                         )
 
 
-    def drawPomPomsFleeing(self, screen, font, text_color, world):
-            for x in range(world.width):
-                for y in range(world.height):
-                    if world.grid[x][y]: #if there is a pompom in this spot
-                        pompom = world.grid[x][y]
-                        if pompom.foodType == True:
-                            pygame.draw.rect(
-                                screen,
-                                (212, 30, 60),  # Green for living PomPoms
-                                (x * world.cell_size, y * world.cell_size, world.cell_size, world.cell_size)
-                            )
-                        elif pompom.mateReady == False:
-                            pygame.draw.rect(
-                                screen,
-                                (16, 144, 144),  # Green for living PomPoms
-                                (x * world.cell_size, y * world.cell_size, world.cell_size, world.cell_size)
-                            )
-                        energy_text = font.render(str(pompom.energy), True, text_color)
-                        text_rect = energy_text.get_rect(center=(
-                            x * world.cell_size + world.cell_size // 2,
-                            y * world.cell_size + world.cell_size // 2
-                        ))
-                        screen.blit(energy_text, text_rect)
+    def drawBodyBits(self, screen, world):
+        """Draws the body bits of each PomPom in the world with different colors based on their type."""
         
-                        
+        for pompom in world.pompoms:
+            if pompom.energy <= 0:  # Skip dead pompoms
+                continue
+
+            body_bit_positions = pompom.calcBodyBitTiles()
+
+            # Mapping body bit types to colors
+            body_bit_colors = {
+                "spike": (255, 0, 0),   # Red
+                "eyeball": (0, 0, 255),  # Blue
+                "shield": (128, 128, 128)  # Gray
+            }
+
+            # Get the size of each cell
+            cell_size = world.cell_size
+
+            # Iterate through body bits and draw them
+            for bit_name, position in body_bit_positions.items():
+                x, y = position
+
+                # Get the corresponding body bit object
+                body_bit = getattr(pompom, bit_name)
+
+                if isinstance(body_bit, spike):
+                    color = body_bit_colors["spike"]
+                elif isinstance(body_bit, eyeball):
+                    color = body_bit_colors["eyeball"]
+                elif isinstance(body_bit, shield):
+                    color = body_bit_colors["shield"]
+                else:
+                    continue  # Skip if no valid body bit
+
+                pygame.draw.rect(
+                    screen,
+                    color,
+                    (x * cell_size, y * cell_size, cell_size, cell_size)
+                )
+
+                            
