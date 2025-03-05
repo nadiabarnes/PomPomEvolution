@@ -46,14 +46,22 @@ class Visualize:
         screen.blit(title_text, (panel_x + padding, y_offset))
         y_offset += 40
 
-        #TODO better efficiency
-        # Display PomPom Counts
-        living_pompoms = len([pompom for pompom in self.world.pompoms if pompom.energy > 0])
-        carn_pompoms = len([pompom for pompom in self.world.pompoms if pompom.energy > 0 and pompom.foodType == "carn"])
-        herb_pompoms = len([pompom for pompom in self.world.pompoms if pompom.energy > 0 and pompom.foodType == "herb"])
-        random_poms = len([pompom for pompom in self.world.pompoms if pompom.energy > 0 and pompom.movePattern == "random"])
-        roomba_poms = len([pompom for pompom in self.world.pompoms if pompom.energy > 0 and pompom.movePattern == "roomba"])
-        wander_poms = len([pompom for pompom in self.world.pompoms if pompom.energy > 0 and pompom.movePattern == "wander"])
+        living_pompoms, carn_pompoms, herb_pompoms = 0, 0, 0
+        roomba_poms, random_poms, wander_poms = 0, 0, 0
+
+        for pompom in self.world.pompoms:
+            if pompom.energy>0:
+                living_pompoms+=1
+            if pompom.energy > 0 and pompom.foodType == "carn":
+                carn_pompoms+=1
+            if pompom.energy > 0 and pompom.foodType == "herb":
+                herb_pompoms+=1
+            if pompom.energy > 0 and pompom.movePattern == "random":
+                random_poms+=1
+            if pompom.energy > 0 and pompom.movePattern == "roomba":
+                roomba_poms+=1
+            if pompom.energy > 0 and pompom.movePattern == "wander":
+                wander_poms+=1
 
         stats = [
             f"Epoch: {self.world.epoch}",
@@ -206,4 +214,29 @@ class Visualize:
                             2
                         )
 
+
+    def drawPomPomsFleeing(self, screen, font, text_color, world):
+            for x in range(world.width):
+                for y in range(world.height):
+                    if world.grid[x][y]: #if there is a pompom in this spot
+                        pompom = world.grid[x][y]
+                        if pompom.foodType == True:
+                            pygame.draw.rect(
+                                screen,
+                                (212, 30, 60),  # Green for living PomPoms
+                                (x * world.cell_size, y * world.cell_size, world.cell_size, world.cell_size)
+                            )
+                        elif pompom.mateReady == False:
+                            pygame.draw.rect(
+                                screen,
+                                (16, 144, 144),  # Green for living PomPoms
+                                (x * world.cell_size, y * world.cell_size, world.cell_size, world.cell_size)
+                            )
+                        energy_text = font.render(str(pompom.energy), True, text_color)
+                        text_rect = energy_text.get_rect(center=(
+                            x * world.cell_size + world.cell_size // 2,
+                            y * world.cell_size + world.cell_size // 2
+                        ))
+                        screen.blit(energy_text, text_rect)
+        
                         
