@@ -12,7 +12,7 @@ class values():
     POM_DENSITY = .005 #percent of tiles that will be poms
     BUSH_DENSITY = .05 #percent of tiles that will be bushes
     PERCENT_CARN = 0.2
-    GAME_SPEED = 4
+    GAME_SPEED = 24
 
     #pompom traits
     HERB_START_MATE = 600 #nrg min to be horny
@@ -20,6 +20,7 @@ class values():
     CARN_START_MATE = 1500
     CARN_END_MATE = 1000
     CARN_DAMAGE = 100 #nrg carns can depelete per round
+    SPIKE_DAMAGE = 20 #nrg from colliding with spike
     HERB_EAT_ENERGY = 50 #nrg gained from eating
     CARN_EAT_ENERGY = 500
     CARN_ENERGY_CAP = 2000 #max carn nrg to be hungry

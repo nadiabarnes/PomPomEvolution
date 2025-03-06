@@ -1,4 +1,4 @@
-from Pom import PomPom
+from Pom import *
 from Food import Bush
 import random
 import pygame

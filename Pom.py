@@ -3,14 +3,13 @@ import pygame
 import numpy
 from Food import Bush
 from config import values
-from BodyBits import *
 
 class PomPom(object):
     """
     This will track an individual pompom and it's behavior
     """
 
-    def __init__(self, x, y, grid, movePattern=None, foodType=None, bodyBit1 = None,
+    def __init__(self, x, y, grid, movePattern=None, foodType=None,
                  bodyBit2 = None, bodyBit3 = None, bodyBit4 = None):
         #import the world grid
         self.grid = grid
@@ -20,8 +19,7 @@ class PomPom(object):
         self.age = 0
         self.energy = 20
         #Initiate body bits
-        if bodyBit1 == None:
-            self.bodyBit1 = self.randomizeBodyBit()
+        self.bodyBit1 = eyeball() #always have an eyeball in front of head
         if bodyBit2 == None:
             self.bodyBit2 = self.randomizeBodyBit()
         if bodyBit3 == None:
@@ -114,7 +112,7 @@ class PomPom(object):
             self.findFood()
         self.updateAdjacentTiles()
         self.foodTypeVision()
-        self.bodyBitInteraction()
+        self.activateBodyBits()
         return self.grid
     
 
@@ -157,28 +155,31 @@ class PomPom(object):
         }
         return body_bit_positions
 
+    
+    def activateBodyBits(self):
+        self.bodyBitSwitcher(self.bodyBit1)
+        self.bodyBitSwitcher(self.bodyBit2)
+        self.bodyBitSwitcher(self.bodyBit3)
+        self.bodyBitSwitcher(self.bodyBit4)
+        
 
-    def bodyBitInteraction(self):
-        positionsList = self.calcBodyBitTiles()
+    def bodyBitSwitcher(self, bodyBit):
+        if isinstance(bodyBit, spike):
+            pom = None
+            positionsList = self.calcBodyBitTiles()
+            for bitName, position in positionsList.items():
+                x, y = position
+                if 0 <= x < self.width and 0 <= y < self.height: 
+                    if self.grid[x][y] and isinstance(self.grid[x][y], PomPom):
+                        if self.grid[x][y] is not self and self.foodType != self.grid[x][y].foodType:
+                            pom = self.grid[x][y]
+            if pom:
+                bodyBit.collision(pom)
 
-        for bitName, position in positionsList.items():
-            x, y = position
-            bodyBit = None
-            if self.isValid((x,y)): 
-                if isinstance(self.grid[x][y], PomPom):
-                    pom = self.grid[x][y]
-                    if bitName == "bodyBit1":
-                        bodyBit = self.bodyBit1
-                        bodyBit.collision(pom)
-                    if bitName == "bodyBit2":
-                        bodyBit = self.bodyBit2
-                        bodyBit.collision(pom)
-                    if bitName == "bodyBit3":
-                        bodyBit = self.bodyBit3
-                        bodyBit.collision(pom)
-                    if bitName == "bodyBit4":
-                        bodyBit = self.bodyBit4
-                        bodyBit.collision(pom)
+        elif isinstance(bodyBit, eyeball):
+            pass
+        elif isinstance(bodyBit, shield):
+            pass
 
 
     def vision(self, size):
@@ -634,3 +635,13 @@ class PomPom(object):
     
         return PomPom(x, y, self.grid, pattern, food)
 
+class spike:
+    def collision(self, pom):
+            pom.takeDamage(values.SPIKE_DAMAGE)
+            print("spike")
+
+class eyeball:
+    pass
+
+class shield:
+    pass

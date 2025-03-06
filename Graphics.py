@@ -1,8 +1,7 @@
 from World import PomPomWorld
-from Pom import PomPom
+from Pom import *
 import pygame
 from config import values
-from BodyBits import *
 
 class Visualize:
     """
@@ -21,18 +20,18 @@ class Visualize:
         text_color = (0, 0, 0)  # black text
 
         # Draw the simulation area (left side)
-        self.drawVisableTiles(screen, self.world)
+        #self.drawVisableTiles(screen, self.world)
         self.drawBushes(screen, self.world)
         self.drawPomPomsFoodtype(screen, font, text_color, self.world)
         self.drawBodyBits(screen, self.world)
-        
+
         # Draw the right-side panel
         panel_x = self.world.width * self.world.cell_size  # Start drawing after the simulation grid
         pygame.draw.rect(screen, (50, 0, 20), (panel_x, 0, values.PANEL_WIDTH, screen.get_height()))  #black panel
 
         self.drawStatisticsPanel(screen, panel_x)
 
-        pygame.display.flip()  # Update the screen
+        pygame.display.flip()  #Update the screen
 
 
     def drawStatisticsPanel(self, screen, panel_x):
