@@ -9,8 +9,7 @@ class PomPom(object):
     This will track an individual pompom and it's behavior
     """
 
-    def __init__(self, x, y, grid, movePattern=None, foodType=None,
-                 bodyBit2 = None, bodyBit3 = None, bodyBit4 = None):
+    def __init__(self, x, y, grid, movePattern=None, foodType=None):
         #import the world grid
         self.grid = grid
         self.width = values.WIDTH
@@ -18,14 +17,6 @@ class PomPom(object):
         #energy increases when food is eaten, decreases by 1 each turn
         self.age = 0
         self.energy = 20
-        #Initiate body bits
-        self.bodyBit1 = eyeball() #always have an eyeball in front of head
-        if bodyBit2 == None:
-            self.bodyBit2 = self.randomizeBodyBit()
-        if bodyBit3 == None:
-            self.bodyBit3 = self.randomizeBodyBit()
-        if bodyBit4 == None:
-            self.bodyBit4 = self.randomizeBodyBit()
         #What tiles the pom can see, changes direction as it moves
         directions = ['N','E','S','W']
         self.facing = random.choice(directions)
@@ -60,18 +51,6 @@ class PomPom(object):
         self.carnSize = values.CARN_VISION_SIZE
         self.foodTypeVision()
         self.updateAdjacentTiles()
-
-
-
-    def randomizeBodyBit(self):
-        temp = random.randint(1,3)
-        if temp == 1:
-            bodyBit = spike()
-        elif temp == 2:
-            bodyBit = eyeball()
-        elif temp == 3:
-            bodyBit = shield()
-        return bodyBit
 
 
     def foodTypeSpecificSetup(self):
@@ -112,7 +91,7 @@ class PomPom(object):
             self.findFood()
         self.updateAdjacentTiles()
         self.foodTypeVision()
-        self.activateBodyBits()
+        #self.bodyBitInteraction()
         return self.grid
     
 
@@ -155,31 +134,28 @@ class PomPom(object):
         }
         return body_bit_positions
 
-    
-    def activateBodyBits(self):
-        self.bodyBitSwitcher(self.bodyBit1)
-        self.bodyBitSwitcher(self.bodyBit2)
-        self.bodyBitSwitcher(self.bodyBit3)
-        self.bodyBitSwitcher(self.bodyBit4)
-        
 
-    def bodyBitSwitcher(self, bodyBit):
-        if isinstance(bodyBit, spike):
-            pom = None
-            positionsList = self.calcBodyBitTiles()
-            for bitName, position in positionsList.items():
-                x, y = position
-                if 0 <= x < self.width and 0 <= y < self.height: 
-                    if self.grid[x][y] and isinstance(self.grid[x][y], PomPom):
-                        if self.grid[x][y] is not self and self.foodType != self.grid[x][y].foodType:
-                            pom = self.grid[x][y]
-            if pom:
-                bodyBit.collision(pom)
+    def bodyBitInteraction(self):
+        positionsList = self.calcBodyBitTiles()
 
-        elif isinstance(bodyBit, eyeball):
-            pass
-        elif isinstance(bodyBit, shield):
-            pass
+        for bitName, position in positionsList.items():
+            x, y = position
+            bodyBit = None
+            if self.isValid((x,y)): 
+                if isinstance(self.grid[x][y], PomPom):
+                    pom = self.grid[x][y]
+                    if bitName == "bodyBit1":
+                        bodyBit = self.bodyBit1
+                        bodyBit.collision(pom)
+                    if bitName == "bodyBit2":
+                        bodyBit = self.bodyBit2
+                        bodyBit.collision(pom)
+                    if bitName == "bodyBit3":
+                        bodyBit = self.bodyBit3
+                        bodyBit.collision(pom)
+                    if bitName == "bodyBit4":
+                        bodyBit = self.bodyBit4
+                        bodyBit.collision(pom)
 
 
     def vision(self, size):
@@ -635,13 +611,3 @@ class PomPom(object):
     
         return PomPom(x, y, self.grid, pattern, food)
 
-class spike:
-    def collision(self, pom):
-            pom.takeDamage(values.SPIKE_DAMAGE)
-            print("spike")
-
-class eyeball:
-    pass
-
-class shield:
-    pass
