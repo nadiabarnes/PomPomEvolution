@@ -9,7 +9,37 @@ class Visualize:
     """
     def __init__(self, world):
         self.world = world
-  
+
+        self.directionAngles = {
+            'N': 0,
+            'E': -90,
+            'S': 180,
+            'W': 90,
+            1: 0,    # spot = 1 is North?
+            2: -90,  # East
+            3: 180,  # South
+            4: 90    # West
+        }
+
+        #self.herbivoreImage = pygame.image.load('assets/herbivore.png').convert_alpha()
+        #self.carnivoreImage = pygame.image.load('assets/carnivore.png').convert_alpha()
+        #self.omnivoreImage = pygame.image.load('assets/omnivore.png').convert_alpha()
+
+        # Scale images to fit the cell size
+        #self.herbivoreImage = pygame.transform.scale(self.herbivoreImage, (world.cell_size, world.cell_size))
+        #self.carnivoreImage = pygame.transform.scale(self.carnivoreImage, (world.cell_size, world.cell_size))
+        #self.omnivoreImage = pygame.transform.scale(self.omnivoreImage, (world.cell_size, world.cell_size))
+
+        #bush setup
+        bush_scale_factor = 1.5
+        new_bush_size = int(world.cell_size * bush_scale_factor)
+        self.bush_offset = (new_bush_size - world.cell_size) // 2
+
+        self.bushImage = pygame.image.load('assets/bushLive.png').convert_alpha()
+        self.bushImage = pygame.transform.scale(self.bushImage, (new_bush_size, new_bush_size))
+        self.bushDeadImage = pygame.image.load('assets/bushDead.png').convert_alpha()
+        self.bushDeadImage = pygame.transform.scale(self.bushDeadImage, (new_bush_size, new_bush_size))
+
 
     def draw(self, screen):
         """
@@ -20,7 +50,7 @@ class Visualize:
         text_color = (0, 0, 0)  # black text
 
         # Draw the simulation area (left side)
-        self.drawVisableTiles(screen, self.world)
+        #self.drawVisableTiles(screen, self.world)
         self.drawBushes(screen, self.world)
         self.drawPomPomsFoodtype(screen, font, text_color, self.world)
 
@@ -74,8 +104,7 @@ class Visualize:
             f"Herbs: {herb_pompoms}",
             f"Random Movers: {random_poms}",
             f"Roomba Movers: {roomba_poms}",
-            f"Wander Movers: {wander_poms}",
-            f"pomlist: {len(self.world.pompoms)}"
+            f"Wander Movers: {wander_poms}"
         ]
 
         # Display each stat
@@ -87,12 +116,13 @@ class Visualize:
 
     def drawBushes(self, screen, world):
         for bush in world.bushes:  # Iterate over the bush list instead of scanning the entire grid
+            draw_x = bush.rect.x * world.cell_size - self.bush_offset
+            draw_y = bush.rect.y * world.cell_size - self.bush_offset
             if bush.cooldown == 0:  # Only draw if active
-                pygame.draw.rect(
-                    screen,
-                    (66, 100, 88),  # Green for active bushes
-                    (bush.rect.x * world.cell_size, bush.rect.y * world.cell_size, world.cell_size, world.cell_size)
-                )
+                screen.blit(self.bushImage, (draw_x, draw_y))
+            else:
+                screen.blit(self.bushDeadImage, (draw_x, draw_y))
+
 
 
     def drawPomPomsMating(self, screen, font, text_color, world):
@@ -218,3 +248,37 @@ class Visualize:
                             ),
                             2
                         )
+    
+    def drawPomPomsFoodtypeNew(self, screen, font, text_color, world):
+        for x in range(world.width):
+            for y in range(world.height):
+                pompom = world.grid[x][y]
+                if not pompom or pompom.energy <= 0:
+                    continue  # Skip dead pompoms or empty cells
+
+                # Choose the image by food type
+                if pompom.foodType == "herb":
+                    baseImage = self.herbivoreImage
+                elif pompom.foodType == "omnivore":
+                    baseImage = self.omnivoreImage
+                elif pompom.foodType == "carn":
+                    baseImage = self.carnivoreImage
+                else:
+                    continue  # Skip unknown food types
+
+                # Get the angle to rotate based on facing/spot
+                facing = getattr(pompom, 'facing', 'N')  # Or use spot if you prefer
+                angle = self.directionAngles.get(facing, 0)
+
+                rotatedImage = pygame.transform.rotate(baseImage, angle)
+
+                # Draw the rotated image
+                screen.blit(rotatedImage, (x * world.cell_size, y * world.cell_size))
+
+                # Overlay energy text
+                energy_text = font.render(str(pompom.energy), True, text_color)
+                text_rect = energy_text.get_rect(center=(
+                    x * world.cell_size + world.cell_size // 2,
+                    y * world.cell_size + world.cell_size // 2
+                ))
+                screen.blit(energy_text, text_rect)
