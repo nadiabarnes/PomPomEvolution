@@ -76,7 +76,7 @@ class PomPom(object):
         Handles PomPom's behavior per turn
         """
         self.grid = grid #match pom's grid to current grid
-        self.age += 1
+        self.age = self.age+1
         self.energy -= 1  # Loses energy each turn
         self.cooldown -= 1
         if self.energy <= 0:
