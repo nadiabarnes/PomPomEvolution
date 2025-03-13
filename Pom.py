@@ -83,9 +83,8 @@ class PomPom(object):
             return self.grid  # don't do anyhthing if dead
         
         self.isMateReady()
-        if self.flee > 0:
-            self.runFromCarn()
-        elif self.mateReady:
+        #self.runFromCarn()  #TODO not working
+        if self.mateReady:
             self.findMate() 
         else:
             self.findFood()

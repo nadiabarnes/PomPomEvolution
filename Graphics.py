@@ -11,9 +11,9 @@ class Visualize:
         self.world = world
 
         self.directionAngles = {
-            'N': 0,
+            'N': 180,
             'E': -90,
-            'S': 180,
+            'S': 0,
             'W': 90,
             1: 0,    # spot = 1 is North?
             2: -90,  # East
@@ -21,23 +21,43 @@ class Visualize:
             4: 90    # West
         }
 
-        #self.herbivoreImage = pygame.image.load('assets/herbivore.png').convert_alpha()
-        #self.carnivoreImage = pygame.image.load('assets/carnivore.png').convert_alpha()
-        #self.omnivoreImage = pygame.image.load('assets/omnivore.png').convert_alpha()
+        #Pom Scale
+        pom_scale_factor = 2
+        new_pom_size = int(world.cell_size * pom_scale_factor)
+        self.pom_offset = (new_pom_size - world.cell_size) // 2
 
-        # Scale images to fit the cell size
-        #self.herbivoreImage = pygame.transform.scale(self.herbivoreImage, (world.cell_size, world.cell_size))
-        #self.carnivoreImage = pygame.transform.scale(self.carnivoreImage, (world.cell_size, world.cell_size))
-        #self.omnivoreImage = pygame.transform.scale(self.omnivoreImage, (world.cell_size, world.cell_size))
+        #herb default
+        self.herbivoreImage = pygame.image.load('assets/HerbavorePom.png').convert_alpha()
+        self.herbivoreImage = pygame.transform.scale(self.herbivoreImage, (new_pom_size, new_pom_size))
+
+        #herb horny
+        self.herbivoreImageHorny = pygame.image.load('assets/HerbavorePomHorny.png').convert_alpha()
+        self.herbivoreImageHorny = pygame.transform.scale(self.herbivoreImageHorny, (new_pom_size, new_pom_size))
+
+        #herb Scared
+        self.herbivoreImageScared = pygame.image.load('assets/herbavorePomScared.png').convert_alpha()
+        self.herbivoreImageScared = pygame.transform.scale(self.herbivoreImageScared, (new_pom_size, new_pom_size))
+
+        #carn default
+        self.carnivoreImage = pygame.image.load('assets/CarnivorePom.png').convert_alpha()
+        self.carnivoreImage = pygame.transform.scale(self.carnivoreImage, (new_pom_size, new_pom_size))
+
+        #carn horny
+        self.carnivoreImageHorny = pygame.image.load('assets/CarnivorePomHorny.png').convert_alpha()
+        self.carnivoreImageHorny = pygame.transform.scale(self.carnivoreImageHorny, (new_pom_size, new_pom_size))
 
         #bush setup
-        bush_scale_factor = 1.5
+        bush_scale_factor = 2
         new_bush_size = int(world.cell_size * bush_scale_factor)
         self.bush_offset = (new_bush_size - world.cell_size) // 2
 
-        self.bushImage = pygame.image.load('assets/bushLive.png').convert_alpha()
-        self.bushImage = pygame.transform.scale(self.bushImage, (new_bush_size, new_bush_size))
-        self.bushDeadImage = pygame.image.load('assets/bushDead.png').convert_alpha()
+        self.bushImage1 = pygame.image.load('assets/bush1.png').convert_alpha()
+        self.bushImage1 = pygame.transform.scale(self.bushImage1, (new_bush_size, new_bush_size))
+        self.bushImage2 = pygame.image.load('assets/bush2.png').convert_alpha()
+        self.bushImage2 = pygame.transform.scale(self.bushImage2, (new_bush_size, new_bush_size))
+        self.bushImage3 = pygame.image.load('assets/bush3.png').convert_alpha()
+        self.bushImage3 = pygame.transform.scale(self.bushImage3, (new_bush_size, new_bush_size))
+        self.bushDeadImage = pygame.image.load('assets/deadBush1.png').convert_alpha()
         self.bushDeadImage = pygame.transform.scale(self.bushDeadImage, (new_bush_size, new_bush_size))
 
 
@@ -119,115 +139,52 @@ class Visualize:
             draw_x = bush.rect.x * world.cell_size - self.bush_offset
             draw_y = bush.rect.y * world.cell_size - self.bush_offset
             if bush.cooldown == 0:  # Only draw if active
-                screen.blit(self.bushImage, (draw_x, draw_y))
+                if bush.version == 1:
+                    screen.blit(self.bushImage1, (draw_x, draw_y))
+                elif bush.version == 2:
+                    screen.blit(self.bushImage2, (draw_x, draw_y))
+                elif bush.version == 3:
+                    screen.blit(self.bushImage3, (draw_x, draw_y))
             else:
                 screen.blit(self.bushDeadImage, (draw_x, draw_y))
 
-
-
-    def drawPomPomsMating(self, screen, font, text_color, world):
-            for x in range(world.width):
-                for y in range(world.height):
-                    if world.grid[x][y]: #if there is a pompom in this spot
-                        pompom = world.grid[x][y]
-                        if pompom.mateReady == True:
-                            pygame.draw.rect(
-                                screen,
-                                (212, 30, 60),  # Green for living PomPoms
-                                (x * world.cell_size, y * world.cell_size, world.cell_size, world.cell_size)
-                            )
-                        elif pompom.mateReady == False:
-                            pygame.draw.rect(
-                                screen,
-                                (16, 144, 144),  # Green for living PomPoms
-                                (x * world.cell_size, y * world.cell_size, world.cell_size, world.cell_size)
-                            )
-                        energy_text = font.render(str(pompom.energy), True, text_color)
-                        text_rect = energy_text.get_rect(center=(
-                            x * world.cell_size + world.cell_size // 2,
-                            y * world.cell_size + world.cell_size // 2
-                        ))
-                        screen.blit(energy_text, text_rect)
-        
 
     def drawPomPomsFoodtype(self, screen, font, text_color, world):
             for x in range(world.width):
                 for y in range(world.height):
                     if world.grid[x][y]: #if there is a pompom in this spot
                         pompom = world.grid[x][y]
+                        draw_x = pompom.rect.x * world.cell_size - self.bush_offset
+                        draw_y = pompom.rect.y * world.cell_size - self.bush_offset
                         if pompom.foodType == "herb":
-                            pygame.draw.rect(
-                                screen,
-                                (65, 255, 110),  #Green for herb
-                                (x * world.cell_size, y * world.cell_size, world.cell_size, world.cell_size)
-                            )
-                        elif pompom.foodType == "omnivore":
-                            pygame.draw.rect(
-                                screen,
-                                (255, 184, 74),  #Yellow for omivore
-                                (x * world.cell_size, y * world.cell_size, world.cell_size, world.cell_size)
-                            )
+                            if pompom.flee > 0:
+                                print("flee")
+                                baseImage = self.herbivoreImageScared
+                                rotatedImage = self.rotatePomImage(pompom, baseImage)
+                                screen.blit(rotatedImage, (draw_x, draw_y))
+                            elif pompom.mateReady:
+                                baseImage = self.herbivoreImageHorny
+                                rotatedImage = self.rotatePomImage(pompom, baseImage)
+                                screen.blit(rotatedImage, (draw_x, draw_y))
+                            else:
+                                baseImage = self.herbivoreImage
+                                rotatedImage = self.rotatePomImage(pompom, baseImage)
+                                screen.blit(rotatedImage, (draw_x, draw_y))
                         elif pompom.foodType == "carn":
-                            pygame.draw.rect(
-                                screen,
-                                (212, 30, 60),  #Red for carn
-                                (x * world.cell_size, y * world.cell_size, world.cell_size, world.cell_size)
-                            )
-                        energy_text = font.render(str(pompom.energy), True, text_color)
-                        text_rect = energy_text.get_rect(center=(
-                            x * world.cell_size + world.cell_size // 2,
-                            y * world.cell_size + world.cell_size // 2
-                        ))
-                        screen.blit(energy_text, text_rect)
+                            if pompom.mateReady:
+                                baseImage = self.carnivoreImageHorny
+                                rotatedImage = self.rotatePomImage(pompom, baseImage)
+                                screen.blit(rotatedImage, (draw_x, draw_y))
+                            else:
+                                baseImage = self.carnivoreImage
+                                rotatedImage = self.rotatePomImage(pompom, baseImage)
+                                screen.blit(rotatedImage, (draw_x, draw_y))
+                        
 
 
-    def drawPomPomsMovePattern(self, screen, font, text_color, world):
-        for x in range(world.width):
-            for y in range(world.height):
-                if world.grid[x][y]: #if there is a pompom in this spot
-                    pompom = world.grid[x][y]
-                    if pompom.movePattern == "random":
-                        pygame.draw.rect(
-                            screen,
-                            (65, 255, 110),  #Green for herb
-                            (x * world.cell_size, y * world.cell_size, world.cell_size, world.cell_size)
-                        )
-                    elif pompom.movePattern == "roomba":
-                        pygame.draw.rect(
-                            screen,
-                            (255, 184, 74),  #Yellow for omivore
-                            (x * world.cell_size, y * world.cell_size, world.cell_size, world.cell_size)
-                        )
-                    elif pompom.movePattern == "wander":
-                        pygame.draw.rect(
-                            screen,
-                            (212, 30, 60),  #Red for carn
-                            (x * world.cell_size, y * world.cell_size, world.cell_size, world.cell_size)
-                        )
-                    energy_text = font.render(str(pompom.energy), True, text_color)
-                    text_rect = energy_text.get_rect(center=(
-                        x * world.cell_size + world.cell_size // 2,
-                        y * world.cell_size + world.cell_size // 2
-                    ))
-                    screen.blit(energy_text, text_rect)
-
-
-    def drawPomPoms(self, screen, font, text_color, world):
-        for x in range(world.width):
-            for y in range(world.height):
-                if world.grid[x][y]: #if there is a pompom in this spot
-                    pompom = world.grid[x][y]
-                    pygame.draw.rect(
-                        screen,
-                        (212, 30, 60),  # Green for living PomPoms
-                        (x * world.cell_size, y * world.cell_size, world.cell_size, world.cell_size)
-                    )
-                    energy_text = font.render(str(pompom.energy), True, text_color)
-                    text_rect = energy_text.get_rect(center=(
-                        x * world.cell_size + world.cell_size // 2,
-                        y * world.cell_size + world.cell_size // 2
-                    ))
-                    screen.blit(energy_text, text_rect)
+    def rotatePomImage(self, pompom, baseimage):
+        angle = self.directionAngles.get(pompom.facing, 0)  # Get rotation angle
+        return pygame.transform.rotate(baseimage, angle)
 
 
     def drawVisableTiles(self, screen, world):

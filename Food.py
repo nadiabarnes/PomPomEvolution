@@ -1,4 +1,5 @@
 import pygame
+import random
 from config import values
 
 class Bush:
@@ -8,6 +9,7 @@ class Bush:
         self.x = x
         self.y = y
         self.cooldown = 0
+        self.version = random.randint(1,3)
         
     def eaten(self):
         """ PomPom eats the bush, triggering cooldown. """

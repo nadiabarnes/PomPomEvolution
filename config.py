@@ -12,7 +12,7 @@ class values():
     POM_DENSITY = .005 #percent of tiles that will be poms
     BUSH_DENSITY = .05 #percent of tiles that will be bushes
     PERCENT_CARN = 0.2
-    GAME_SPEED = 24
+    GAME_SPEED = 4
 
     #pompom traits
     HERB_START_MATE = 600 #nrg min to be horny
@@ -38,13 +38,13 @@ class values():
     BUSH_COOLDOWN = 100
 
     #PC
-    #PANEL_WIDTH = 200 
-    #SCREEN_WIDTH = 1000 + PANEL_WIDTH 
-    #SCREEN_HEIGHT = 1000  # Fixed screen height
+    PANEL_WIDTH = 200 
+    SCREEN_WIDTH = 1000 + PANEL_WIDTH 
+    SCREEN_HEIGHT = 1000  # Fixed screen height
 
     #laptop
-    PANEL_WIDTH = 200 
-    SCREEN_WIDTH = 700 + PANEL_WIDTH 
-    SCREEN_HEIGHT = 700  # Fixed screen height
+    #PANEL_WIDTH = 200 
+    #SCREEN_WIDTH = 700 + PANEL_WIDTH 
+    #SCREEN_HEIGHT = 700  # Fixed screen height
 
     CELLSIZE = min((SCREEN_WIDTH - PANEL_WIDTH) // WIDTH, SCREEN_HEIGHT // HEIGHT)  # Ensure grid fits
